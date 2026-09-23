@@ -1,0 +1,6 @@
+set_pin_assignment	{ I_sysclk }	{ LOCATION = T16; IOSTANDARD = LVCMOS18; PULLTYPE = PULLUP; }
+set_pin_assignment	{ O_up_led }	{ LOCATION = U18; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; PULLTYPE = NONE; }
+
+
+
+

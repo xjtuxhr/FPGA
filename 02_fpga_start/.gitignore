@@ -1,0 +1,6 @@
+# Anlogic TD build output
+fpga_prj_Runs/
+log/
+
+# Local tool config
+.recent_user_depot.ini
