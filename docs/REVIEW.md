@@ -1,6 +1,35 @@
-# 2026-09-21 审查记录
+# 审查与架构变更记录
 
-**历史记录，已被当前 [PLAN](../PLAN.md) 更新：**本页当时推荐 stories260K；此后团队已明确改用 stories15M 作为正式模型，260K 仅供早期单元联调。以下涉及“当前方案=260K、片上容纳完整模型”的段落是旧决策理由，不再指导实现。现行计算与存储口径见 [COMPUTE_ARCHITECTURE](COMPUTE_ARCHITECTURE.md)，开放问题见 [UNKNOWN Registry](UNKNOWNS.md)。
+## 2026-09-26：方案C + Smol135M正式冻结
+
+团队取代旧全FPGA路线：RK CPU/NPU承担QKV/O/MLP/LM Head，权重常驻RK LPDDR4X；PH1A90承担KVmix/QK/softmax/PV，FPGA DDR存KV/metadata/buffer。stories15M不再是首个完整上板目标，Smol135M从候选升为正式模型。完整推理闭环仍需验证，不声明性能已证明。
+
+旧全FPGA计划、GEMV/FPGA LM Head/权重扫描、640+64KiB ERAM超限、FP16权重超256MiB DDR等结论保存在带HISTORICAL标签的文件，不能直接套方案C。当前Attention-only约204KiB预算、PCIe16bit约90KiB/token分别是CANDIDATE/DERIVED，不是MEASURED。NPU实效、小包延迟、数值/综合/质量仍见 [唯一Registry](UNKNOWNS.md)。
+
+带宽与MAC数不是FPGA存在意义的充分证明；需同质量RK-only对照，分测NPU、copy/sync、PCIe、FPGA和端到端。近期主线改为NPU shape + PCIe小包 + Attention-only，而非完整Transformer RTL。B/U/M不变量保持不变；原50天D1不重置。
+
+## 以下为历史审查（SUPERSEDED）
+
+**历史记录，已被当前 [PLAN](../PLAN.md) 更新：**最早推荐260K，随后正式目标曾改为15M；2026-09-26依据PC报告15M/42M均退出正式算法效果目标，Smol135M为软件/预算候选、首次上板模型待冻结。下方260K/15M历史决策不再指导模型选择。当前证据见 [模型与PC结果](MODEL_AND_PC_RESULTS.md)，开放问题见 [Registry](UNKNOWNS.md)。
+
+## 2026-09-26：PC报告与预算审查
+
+### 同日：SEG324器件规格口径修正
+
+用户提供接口/资源两张截图，项目以 **PH1A90SEG324** 行为准，而非相邻PH1A90SBG484或PH1A60GEG324/C。完整转录和证据边界见 [硬件事实](HARDWARE_FACTS.md)。SEG324为8路SerDes/10.3125 Gbps、DDR1066 Mbps/x16、148用户IO、LFBGA324、115776 LUT；SBG484的4路/12.5 Gbps、x40、280 IO、20 MIPI IO不能用于本项目。240 DSP与5440K ERAM不变，故原容量预算仍成立。旧“PCIe/MIPI工程”措辞改为优先请求匹配SEG324的PCIe工程，MIPI仅待核查线索，不作为已证实退路。芯片规格不证明板级连接、DDR容量或实测吞吐；本次未修改预算脚本、RTL、模型或约束。
+
+| 旧判断 | 修正与影响 |
+|---|---|
+| 尚无PC模型/量化实验 | 用户提供summary_of_PCtest.pdf，四模型解码路径数值PPL已登记；缺原脚本/样本/上下文/方差，不能说已独立重跑 |
+| 42M可能能替代15M做正式效果展示 | 报告42M M PPL=3.72、U=3.69，未显示正收益；只可作调试，不能因参数更大就保留正式目标 |
+| Smol config dtype等于下载文件dtype | config BF16，本地safetensors实际F32；134,515,008参数，tie属性有实际header证据 |
+| 预算M默认20%、15M两层 | 报告用max(1,floor(10%L))；脚本默认改为10%，Smol3层、15M1层；旧表用important-layers=2复现，不掩盖改变 |
+| 2-bit模型必然更省DSP、8倍算力/吞吐 | 本项目量化KV而非所有权重/activation；模型MAC不变，省KV流量却新增转换/打包/迁移。脚本增加这些工作量和显式速率，不虚构资源比例 |
+| M相对B的PPL≤5%可直接作为承诺 | Smol报告仍约14.6%退化，原目标不现实；PLAN撤销既定阈值，待W8+共同定点路径复测后老师设置 |
+| 报告证明收益随参数量增长 | Smol135M比Qwen0.5B参数更少且收益更大；数据集/tokenizer/设置不同，四点不能证明该因果关系 |
+| 所有M收益都来自梯度选层 | 高位宽、RPC、group/metadata及K3降位共同变化；需tail-only与同字节预算随机层消融 |
+
+本轮未修改PC报告、模型、RTL/工程、Git忽略规则，也未编写正式host或部署Linux。预算指南给出的group32/tail32/dense K3等是假设，不复用PC PPL作其质量证明。旧审查记录保留便于追溯。
 
 ## 2026-09-23 计算架构自审修正
 

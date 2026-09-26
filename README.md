@@ -1,25 +1,36 @@
-# KVmix on FPGA
+# KVmix_on_FPGA
 
-目标：用完整轻量语言模型在 FPGA 上生成文字，比较普通 KV 缓存与 KVmix 混合精度缓存。当前条件：3 位初学者、2 位指导老师、约 50 天；已确定使用安路 MLK-AFH03（PH1A90）。
+更新：2026-09-26。**正式模型：HuggingFaceTB/SmolLM-135M；正式架构：方案 C。** 团队决定已冻结，不表示已经上板成功。
 
-**从 [PLAN.md](PLAN.md) 开始。** 当前主线是现成 stories15M 模型；层重要性分析在电脑离线完成，完整 Transformer 推理和 KVmix 留在 FPGA，DDR 保存权重和完整 KV Cache。stories260K 仅用于最早期算子联调。
-
-| 需要什么 | 打开哪里 |
-|---|---|
-| 现在做什么、用什么工具、50 天怎么排 | [PLAN.md](PLAN.md) 第 4～5、8 节 |
-| 填人员、板卡、期限和进度 | [项目状态](docs/PROJECT_STATUS.md) |
-| 查 stories15M 计算图、MAC/DDR 公式及未冻结设计候选 | [计算架构](docs/COMPUTE_ARCHITECTURE.md) |
-| 查尚缺什么证据、何时必须确认 | [UNKNOWN Registry](docs/UNKNOWNS.md) |
-| 为什么推翻旧计划的一些结论 | [审查记录](docs/REVIEW.md) |
-| 找原论文/赛题 | 根目录的 KVmix-arxiv.pdf、[安路科技]选题指南.pdf |
-| 查 RAM、DSP 等手册 | [资料索引](references/README.md) |
-| 找旧版、重复研究、网页缓存 | [归档说明](archive/2026-09-21/README.md) |
-
-当前可运行的是预算计算，尚无完整模型软件/RTL 实现：
-
-```powershell
-python tools/budget_check.py --self-test
-python tools/budget_check.py --model stories15m --contexts 64 128 256
+```text
+PC：离线重要性分析 / reference / 开发工具 / 用户终端
+RK3576 CPU：tokenizer / sampling / 控制 / tensor orchestration / 轻量算子
+RK3576 NPU：QKV / O / MLP / LM Head，权重常驻RK LPDDR4X
+  ↓ 每层Q/K/V，PCIe
+PH1A90SEG324：KVmix / KV管理 / QK / softmax / PV / 性能计数
+  ↔ FPGA DDR：完整KV + metadata + buffers
+  ↑ 每层attention output，PCIe
+RK3576：继续下一层 → logits / sampling / detokenizer → 用户文字
 ```
 
-预算含明确假设，不代表板上实测。`budget_model.py` 保留为上述工具的兼容入口。新写的开发代码、日志以后分别放 software/、rtl/、sim/、host/、results/；计划中列出的文件名均为待开发产物。
+RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整模型权重；不走PCIe持续权重流送。ERAM名义680 KiB，目标不用disRAM，约204 KiB工作集只是候选预算。
+
+当前关键工作：**NPU实际shape/M=1 benchmark → PCIe小tensor往返测量 → Attention-only FPGA bring-up**，不是完整Transformer RTL。stories15M/42M/70M保留为参考/单元验证，不主导完整上板验收。
+
+阅读顺序：
+
+1. [PLAN](PLAN.md)：冻结边界、分工、里程碑。
+2. [PROJECT_STATUS](docs/PROJECT_STATUS.md)：事实与进度。
+3. [COMPUTE_ARCHITECTURE](docs/COMPUTE_ARCHITECTURE.md)：当前计算与数据流。
+4. [UNKNOWNS](docs/UNKNOWNS.md)：唯一开放问题清单。
+5. [预算说明](docs/BUDGET_GUIDE.md)、[模型与PC证据](docs/MODEL_AND_PC_RESULTS.md)、[硬件事实](docs/HARDWARE_FACTS.md)。
+6. [REVIEW](docs/REVIEW.md)：历史判断修正；[原始资料](references/README.md)。
+
+```powershell
+python tools/budget_check.py --model smol135m
+python tools/budget_check.py --self-test
+```
+
+脚本默认heterogeneous_c；full_fpga仅历史比较。B=FP16 KV存储，U=全层全token K2/V2无tail，M=layer-aware mixed + recent FP16 tail；三组共享RK计算、权重、接口、FPGA Attention算术和评测设置。容量通过不等于NPU/PCIe/数值/综合验收通过。
+
+历史入口：[旧计划](PLAN_FULL_FPGA_HISTORY.md)、[旧计算架构](docs/COMPUTE_ARCHITECTURE_FULL_FPGA_HISTORY.md)、[旧预算说明](docs/BUDGET_FULL_FPGA_HISTORY.md)。其SUPERSEDED/HISTORICAL内容不指导当前开发。
