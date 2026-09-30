@@ -1,6 +1,6 @@
 # 预算工具：方案C与历史全FPGA
 
-更新：2026-09-26。tools/budget_check.py仅标准库，不加载模型/改输入。默认heterogeneous_c，省略模型时交互选择，批处理须--model；正式目标smol135m，其他六模型保留。
+更新：2026-09-30。`tools/budget_check.py` 当前只在本地工作区，**未随 Git 文档上传**；下列命令供已取得脚本的成员复算，文中的预算表可独立阅读。脚本仅用标准库，不加载模型或修改输入；默认heterogeneous_c，省略模型时交互选择，批处理须--model；正式目标smol135m，其他六模型保留。
 
 ```powershell
 python tools/budget_check.py --list-models

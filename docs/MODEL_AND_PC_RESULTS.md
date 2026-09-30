@@ -1,6 +1,6 @@
 # 模型参数与 PC 评测证据
 
-核查日期：2026-09-26。这是模型事实与PC报告的入口，不是FPGA完成证明；开放问题统一在 [UNKNOWNS](UNKNOWNS.md)。
+核查日期：2026-09-26。这是模型事实与PC报告的入口，不是FPGA完成证明；开放问题统一在 [UNKNOWNS](UNKNOWNS.md)。模型文件和原始报告未纳入本次 Git 文档提交，下面保留核验结果与哈希供协作者对照。
 
 ## 1. SmolLM-135M：FACT
 
@@ -38,7 +38,7 @@
 
 ## 2. PC报告：报告提供的结果，不冒充独立重跑
 
-来源：根目录 [summary_of_PCtest.pdf](../summary_of_PCtest.pdf)，共3页，本轮完整读文本并核对第1页表格。使用纯PyTorch量化/反量化数值实现；内存压缩按理论bit packing含scale/min估计，**没有FPGA资源/频率/吞吐或实际CUDA显存证据**。
+来源：工作区根目录的 `summary_of_PCtest.pdf`，共3页；原 PDF **未随 Git 文档上传**，下表保留其关键结果供协作者阅读。本轮完整读文本并核对第1页表格。报告使用纯PyTorch量化/反量化数值实现；内存压缩按理论bit packing含scale/min估计，**没有FPGA资源/频率/吞吐或实际CUDA显存证据**。
 
 | 模型 | 数据集 | FP16 PPL | U PPL | M PPL | U−M |
 |---|---|---:|---:|---:|---:|
