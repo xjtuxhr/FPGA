@@ -5,3 +5,6 @@
 /references
 /tools
 /[安路科技]选题指南.pdf
+
+__pycache__/
+*.pyc
