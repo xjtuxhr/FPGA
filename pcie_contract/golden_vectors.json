@@ -1,0 +1,81 @@
+{
+  "protocol_version": 2,
+  "scope": "PC codec/testbench golden; no board evidence",
+  "generation": "Independent struct/zlib reference; full frame = header_hex bytes + described payload",
+  "vectors": [
+    {
+      "name": "attention_request",
+      "direction": "h2c",
+      "op": 0,
+      "seq": 7,
+      "layer": 3,
+      "position": 128,
+      "payload_bytes": 1920,
+      "pattern": "zeros",
+      "header_hex": "4b564d58020000000300000080000000070000008007000042fa479900000000",
+      "frame_sha256": "fdb852f9dda040aa58e98e0b97171b934cf12b9ea78e67ed98e09be29303ca84"
+    },
+    {
+      "name": "attention_response",
+      "direction": "c2h",
+      "op": 0,
+      "seq": 7,
+      "layer": 3,
+      "position": 128,
+      "payload_bytes": 1152,
+      "pattern": "zeros",
+      "header_hex": "4b564d58020000000300000080000000070000008004000043f1e9de00000000",
+      "frame_sha256": "ee301ec6a1fbc4bb9a8d6e9b21721135c5c662cf3be04bff41f7f7c23ed718ce"
+    },
+    {
+      "name": "reset_request",
+      "direction": "h2c",
+      "op": 1,
+      "seq": 8,
+      "layer": 255,
+      "position": 0,
+      "payload_bytes": 0,
+      "pattern": "zeros",
+      "header_hex": "4b564d5802000100ff00000000000000080000000000000075a20bac00000000",
+      "frame_sha256": "d93226bdc8354b2ab96fbb0b3aba0e5761969918b53babb087fe6bf7c549440c"
+    },
+    {
+      "name": "reset_ack",
+      "direction": "c2h",
+      "op": 1,
+      "seq": 8,
+      "layer": 255,
+      "position": 0,
+      "payload_bytes": 0,
+      "pattern": "zeros",
+      "header_hex": "4b564d5802000100ff00000000000000080000000000000075a20bac00000000",
+      "frame_sha256": "d93226bdc8354b2ab96fbb0b3aba0e5761969918b53babb087fe6bf7c549440c"
+    },
+    {
+      "name": "test_request",
+      "direction": "h2c",
+      "op": 2,
+      "seq": 9,
+      "layer": 0,
+      "position": 0,
+      "payload_bytes": 1920,
+      "pattern": "counter",
+      "header_hex": "4b564d58020002000000000000000000090000008007000091a6b11800000000",
+      "frame_sha256": "3ae09b3033ba043331e5dea90751a925b5f559943611c77d1ddbaba561ebe849",
+      "counter": 16909060
+    },
+    {
+      "name": "test_response",
+      "direction": "c2h",
+      "op": 2,
+      "seq": 9,
+      "layer": 0,
+      "position": 0,
+      "payload_bytes": 1152,
+      "pattern": "counter",
+      "header_hex": "4b564d580200020000000000000000000900000080040000c0046bef00000000",
+      "frame_sha256": "8cdff557720a1e4650c94bf3a7826c58e4eb7d5895f4dc4b9e85ad0aece8be86",
+      "counter": 16909060
+    }
+  ]
+}

@@ -1,12 +1,31 @@
 {
   "protocol": "pcie_attention",
-  "version": "0.1",
-  "status": "DRAFT",
-  "magic_hex": "0x4B564D58",
-  "magic_note": "\"KVMX\" little-endian",
-  "protocol_version": 1,
+  "version": "0.2",
+  "status": "TEST_PROFILE_FIXED_NOT_BOARD_VERIFIED",
+  "protocol_version": 2,
+  "magic_ascii": "KVMX",
+  "magic_hex": "0x584D564B",
+  "byte_order": "little",
   "wire_dtype": "fp16_le",
+  "wire_dtype_status": "TEST_PROFILE_ONLY_PRODUCTION_NUMERIC_GATE_PENDING",
   "header_bytes": 32,
+  "flags_allowed": 0,
+  "global_layer": 255,
+  "sequence_min": 1,
+  "sequence_max": 4294967295,
+  "max_inflight": 1,
+  "checksum": {
+    "name": "CRC-32/ISO-HDLC",
+    "polynomial_hex": "0x04C11DB7",
+    "reflected_polynomial_hex": "0xEDB88320",
+    "initial_hex": "0xFFFFFFFF",
+    "xor_out_hex": "0xFFFFFFFF",
+    "reflect_input": true,
+    "reflect_output": true,
+    "coverage": "32-byte header with crc32 field zeroed, followed by logical payload; DMA padding excluded",
+    "check_ascii": "123456789",
+    "check_hex": "0xCBF43926"
+  },
   "model": {
     "hidden": 576,
     "kv_dim": 192,
@@ -15,7 +34,8 @@
     "kv_heads": 3,
     "head_dim": 64,
     "vocab": 49152,
-    "context": 2048
+    "context": 2048,
+    "initial_contexts": [64, 128, 256]
   },
   "payloads": {
     "h2c_bytes": 1920,
@@ -23,26 +43,38 @@
     "h2c_total_bytes": 1952,
     "c2h_total_bytes": 1184
   },
-  "ops": {
-    "attention": 0,
-    "reset_cache": 1
+  "ops": {"attention": 0, "reset_cache": 1, "test": 2},
+  "operation_payload_bytes": {
+    "attention": {"h2c": 1920, "c2h": 1152},
+    "reset_cache": {"h2c": 0, "c2h": 0},
+    "test": {"h2c": 1920, "c2h": 1152}
   },
-  "status_bits": {
-    "done": 1,
-    "error": 2,
-    "idle": 4,
-    "version_mismatch": 8
+  "tensor_layout": {
+    "h2c": "Q then K then V; each head-major, head_dim contiguous",
+    "q_shape": [9, 64],
+    "k_shape": [3, 64],
+    "v_shape": [3, 64],
+    "output_shape": [9, 64],
+    "gqa_mapping": "kv_head = q_head // 3",
+    "rope_boundary": "RK applies model-compatible RoPE to Q/K before serialization; V unchanged",
+    "numeric_status": "Integration convention; reference/production precision not yet verified"
   },
-  "ctrl_bits": {
-    "run": 1,
-    "reset_cache": 2
+  "test_pattern": {
+    "counter_bytes": 4,
+    "body_rule": "byte[i] = (counter + i) & 255 for i >= 4",
+    "response_rule": "first c2h_bytes of request payload; no Attention and no KV mutation"
   },
-  "registers": {
-    "version": "0x00",
-    "ctrl": "0x04",
-    "status": "0x08",
-    "doorbell": "0x0C",
-    "attn_ms": "0x10"
+  "transport": {
+    "status": "UNBOUND",
+    "preferred_bulk_access": "existing official SGDMA H2C/C2H character devices",
+    "preferred_control_access": "validated user character-device 32-bit pread/pwrite; not default raw mmap",
+    "driver_dma_completion": "preserve existing driver interrupt/synchronization mechanism",
+    "application_completion": "single inflight; poll logical status if implemented by verified binding",
+    "register_offsets": null,
+    "device_nodes": null,
+    "dma_alignment": null,
+    "dma_length_granularity": null,
+    "binding_document": "TRANSPORT_BINDING.md"
   },
   "header_layout": [
     {"field": "magic", "offset": 0, "size": 4, "type": "u32"},
@@ -50,10 +82,12 @@
     {"field": "op", "offset": 6, "size": 1, "type": "u8"},
     {"field": "flags", "offset": 7, "size": 1, "type": "u8"},
     {"field": "layer", "offset": 8, "size": 1, "type": "u8"},
+    {"field": "padding0", "offset": 9, "size": 3, "type": "zero_bytes"},
     {"field": "position", "offset": 12, "size": 4, "type": "u32"},
     {"field": "seq", "offset": 16, "size": 4, "type": "u32"},
     {"field": "payload_len", "offset": 20, "size": 2, "type": "u16"},
-    {"field": "crc32c", "offset": 24, "size": 4, "type": "u32"},
-    {"field": "reserved", "offset": 28, "size": 4, "type": "u32"}
+    {"field": "padding1", "offset": 22, "size": 2, "type": "zero_bytes"},
+    {"field": "crc32", "offset": 24, "size": 4, "type": "u32"},
+    {"field": "reserved", "offset": 28, "size": 4, "type": "zero_bytes"}
   ]
 }
