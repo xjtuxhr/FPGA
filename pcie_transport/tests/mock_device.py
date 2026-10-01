@@ -17,6 +17,8 @@ class Faults:
     stale_response: bool = False       # read_exact returns a frame from seq-1
     corrupt_frame: bool = False        # flip one byte of the response frame
     short_read: bool = False           # truncate the pending response
+    short_write: bool = False          # write reports fewer bytes than the frame
+    write_delay_s: float = 0.0         # write blocks this long (reentrancy tests)
     delay_s: float = 0.0               # wait_ready blocks this long
 
 
@@ -31,6 +33,8 @@ class MockDevice:
         self.notifies = 0
 
     def write(self, frame: bytes, *, deadline: float) -> int:
+        if self.faults.write_delay_s:
+            time.sleep(self.faults.write_delay_s)
         self.last_frame = frame
         header, _ = c.unpack_request(frame)
         payload = frame[c.HEADER_BYTES:]
@@ -56,7 +60,7 @@ class MockDevice:
             self.ready_seq = None
         else:
             self.ready_seq = header.seq
-        return len(frame)
+        return len(frame) // 2 if self.faults.short_write else len(frame)
 
     def wait_ready(self, seq: int, *, deadline: float) -> bool:
         if self.faults.delay_s:

@@ -23,9 +23,10 @@ from pcie_transport.tests.mock_device import MockDevice
 
 
 def make_binding_for_mock() -> object:
-    from pcie_transport.binding import Binding
+    from pcie_transport.binding import Binding, KIND_MOCK
     return Binding(
-        binding_version=1, contract_version=2, evidence_ref="mock (PC-only, not board evidence)",
+        kind=KIND_MOCK, binding_version=1, contract_version=2,
+        evidence_ref="mock (PC-only, not board evidence)",
         bdf="mock:00.0", vendor_device="1edb:abcd", bound_driver="mock",
         h2c_node="/dev/mock_h2c", c2h_node="/dev/mock_c2h", control_node="/dev/mock_ctrl",
         access_method="mock in-memory", data_mode="mock",

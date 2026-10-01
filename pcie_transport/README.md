@@ -29,6 +29,10 @@ mock 结果只验证状态机与校验逻辑正确，**不是 Gate 证据**。
 ## 约束
 
 - 保留 SGDMA 驱动 DMA 完成中断；应用层只轮询逻辑状态，不关 MSI/ASPM、不引入 UIO
-- 单请求在途；seq 非零递增、session 内不复用；旧帧/旧 DONE 不满足新请求
-- 所有等待带有限 monotonic deadline；short read/write 不算完成
+- 单请求在途：请求槽在**第一次设备调用前**占用，并发/重入立即拒绝（不污染在途请求）
+- Attention 在收到有效 reset ACK 前被拒绝；`recover()` 后重新要求 reset，防止沿用不确定的 KV 状态
+- seq 非零递增、session 内不复用；旧帧/旧 DONE 不满足新请求
+- 超时为**整个请求一个**有限 monotonic deadline；inf/nan/非正值一律拒绝
+- short write/read 不算完成，不擅自分段重发；H2C 写完后显式调用 `notify()`（逻辑门铃，映射由 binding 定义）
+- binding 校验集中实现：构造/加载/保存/Transport 入口共用同一规则（协议版本、设备 ID、kind）；mock 与实板 binding 用 `kind` 明确区分
 - binding 未完整前 `transport.py` 拒绝运行（fail closed）
