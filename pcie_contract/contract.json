@@ -1,0 +1,59 @@
+{
+  "protocol": "pcie_attention",
+  "version": "0.1",
+  "status": "DRAFT",
+  "magic_hex": "0x4B564D58",
+  "magic_note": "\"KVMX\" little-endian",
+  "protocol_version": 1,
+  "wire_dtype": "fp16_le",
+  "header_bytes": 32,
+  "model": {
+    "hidden": 576,
+    "kv_dim": 192,
+    "layers": 30,
+    "q_heads": 9,
+    "kv_heads": 3,
+    "head_dim": 64,
+    "vocab": 49152,
+    "context": 2048
+  },
+  "payloads": {
+    "h2c_bytes": 1920,
+    "c2h_bytes": 1152,
+    "h2c_total_bytes": 1952,
+    "c2h_total_bytes": 1184
+  },
+  "ops": {
+    "attention": 0,
+    "reset_cache": 1
+  },
+  "status_bits": {
+    "done": 1,
+    "error": 2,
+    "idle": 4,
+    "version_mismatch": 8
+  },
+  "ctrl_bits": {
+    "run": 1,
+    "reset_cache": 2
+  },
+  "registers": {
+    "version": "0x00",
+    "ctrl": "0x04",
+    "status": "0x08",
+    "doorbell": "0x0C",
+    "attn_ms": "0x10"
+  },
+  "header_layout": [
+    {"field": "magic", "offset": 0, "size": 4, "type": "u32"},
+    {"field": "version", "offset": 4, "size": 2, "type": "u16"},
+    {"field": "op", "offset": 6, "size": 1, "type": "u8"},
+    {"field": "flags", "offset": 7, "size": 1, "type": "u8"},
+    {"field": "layer", "offset": 8, "size": 1, "type": "u8"},
+    {"field": "position", "offset": 12, "size": 4, "type": "u32"},
+    {"field": "seq", "offset": 16, "size": 4, "type": "u32"},
+    {"field": "payload_len", "offset": 20, "size": 2, "type": "u16"},
+    {"field": "crc32c", "offset": 24, "size": 4, "type": "u32"},
+    {"field": "reserved", "offset": 28, "size": 4, "type": "u32"}
+  ]
+}
