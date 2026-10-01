@@ -7,6 +7,7 @@ import json
 import threading
 import time
 import unittest
+from dataclasses import asdict
 from pathlib import Path
 
 from pcie_contract import contract as c
@@ -60,6 +61,43 @@ class BindingTests(unittest.TestCase):
                           vendor_device="1edb:abcd", bdf="t:00.0")
         with self.assertRaises(b.BindingError):
             Transport(MockDevice(), bogus)
+
+    def test_real_binding_requires_evidence_fields(self):
+        # Core fields all filled, but the four handover-evidence fields empty:
+        # must NOT count as bound, and Transport/load/save must all refuse.
+        base = {name: getattr(valid_binding(), name)
+                for name in valid_binding().__dataclass_fields__}
+        for field_name in ("evidence_ref", "bound_driver", "bars", "address_formula"):
+            base[field_name] = ""
+        real = b.Binding(**{**base, "kind": b.KIND_REAL})
+        self.assertFalse(real.is_bound)
+        with self.assertRaises(b.BindingError):
+            Transport(MockDevice(), real)
+        with self.assertRaises(b.BindingError):
+            real.save(Path("binding_tmp_test.json"))
+
+        tmp = Path("binding_tmp_test.json")
+        tmp.write_text(json.dumps(asdict(real)), encoding="utf-8")
+        try:
+            with self.assertRaises(b.BindingError):
+                b.Binding.load(tmp)
+        finally:
+            tmp.unlink(missing_ok=True)
+
+    def test_real_binding_with_evidence_accepted(self):
+        real = b.Binding(
+            kind=b.KIND_REAL, binding_version=1, contract_version=2,
+            evidence_ref="board-log-001", bdf="01:00.0", vendor_device="1edb:abcd",
+            bound_driver="anlogic_pci", bars="BAR0 0xf0000000 size 1M",
+            h2c_node="/dev/ANLOGIC-PCI0_0", c2h_node="/dev/ANLOGIC-PCI0_1",
+            control_node="/dev/ANLOGIC-PCI0_2", access_method="user 32-bit pread/pwrite",
+            address_formula="user BAR base +0x80000",
+            data_mode="AXI-MM", dma_alignment="4B",
+            dma_length_granularity="4B", submit_order="H2C then C2H",
+            dma_completion="driver IRQ", attention_completion="status poll",
+            timeout_handling="finite monotonic deadline", clock_method="time.monotonic",
+        )
+        self.assertTrue(real.is_bound)
 
     def test_load_rejects_missing_file_and_bad_contract(self):
         with self.assertRaises(b.BindingError):

@@ -34,5 +34,5 @@ mock 结果只验证状态机与校验逻辑正确，**不是 Gate 证据**。
 - seq 非零递增、session 内不复用；旧帧/旧 DONE 不满足新请求
 - 超时为**整个请求一个**有限 monotonic deadline；inf/nan/非正值一律拒绝
 - short write/read 不算完成，不擅自分段重发；H2C 写完后显式调用 `notify()`（逻辑门铃，映射由 binding 定义）
-- binding 校验集中实现：构造/加载/保存/Transport 入口共用同一规则（协议版本、设备 ID、kind）；mock 与实板 binding 用 `kind` 明确区分
+- binding 校验集中实现：构造/加载/保存/Transport 入口共用同一规则（协议版本、设备 ID、kind）；mock 与实板 binding 用 `kind` 明确区分，`kind="real"` 额外要求 `evidence_ref`/`bound_driver`/`bars`/`address_formula` 交接证据，缺证据一律拒绝
 - binding 未完整前 `transport.py` 拒绝运行（fail closed）

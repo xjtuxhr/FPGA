@@ -59,12 +59,15 @@ class Binding:
     poll_interval: str = ""
     correctness_method: str = ""
 
-    _REQUIRED_EVIDENCE = {
+    _REQUIRED_EVIDENCE_CORE = {
         "binding_version", "contract_version", "bdf", "vendor_device",
         "h2c_node", "c2h_node", "control_node", "access_method",
         "data_mode", "dma_alignment", "dma_length_granularity",
         "submit_order", "dma_completion", "attention_completion",
         "timeout_handling", "clock_method",
+    }
+    _REQUIRED_EVIDENCE_REAL = _REQUIRED_EVIDENCE_CORE | {
+        "evidence_ref", "bound_driver", "bars", "address_formula",
     }
 
     def __post_init__(self) -> None:
@@ -82,14 +85,22 @@ class Binding:
             raise BindingError(f"Binding must target 1edb:abcd, got {self.vendor_device!r}")
         for field_name in self.__dataclass_fields__:
             value = getattr(self, field_name)
-            if field_name == "kind" or field_name in self._REQUIRED_EVIDENCE:
+            if field_name == "kind" or field_name in self._REQUIRED_EVIDENCE_REAL:
                 continue
             if not isinstance(value, str):
                 raise BindingError(f"{field_name} must be a string, got {type(value).__name__}")
 
     @property
     def is_bound(self) -> bool:
-        return all(getattr(self, name) for name in self._REQUIRED_EVIDENCE)
+        """Evidence completeness, kind-aware.
+
+        A real board binding additionally requires the handover evidence
+        named in TRANSPORT_BINDING.md (evidence_ref, bound_driver, bars,
+        address_formula); a mock binding only needs the core access fields.
+        """
+        required = (self._REQUIRED_EVIDENCE_REAL if self.kind == KIND_REAL
+                    else self._REQUIRED_EVIDENCE_CORE)
+        return all(getattr(self, name) for name in required)
 
     @classmethod
     def load(cls, path: Path) -> "Binding":
