@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Patch pcie@2a210000 status disabled->okay IN PLACE on /dev/mmcblk0p3.
 
+SUPERSEDED for the board's p3 by tools/fit_dtb_patch.py (2026-10-05 review).
+/dev/mmcblk0p3 is a U-Boot FIT container, not a raw DTB; this tool walks the
+OUTER FIT and therefore cannot find pcie@2a210000 (it fails closed, but cannot
+enable PCIe). This file now treats its input as a plain DTB only. Use
+fit_dtb_patch.py to extract/patch the embedded flat_dt image instead.
+
 PC2 PCIe bring-up, checkpoint 2. Must be run as root (block device write).
 Fails closed: real FDT structure walk (no string search), backup before
 write, running-DTB cross-check, post-patch re-verification.

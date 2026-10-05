@@ -17,11 +17,12 @@ transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/�
 - `oracle_test.py`：OP_TEST 30 轮串行基准（每轮不同 counter、逐字节比对、
   min/mean/max/p95），区分 raw/framed profile 标记
 - `tools/run_op_test_on_board.py`：**板端** framed v2 30 轮 runner（需完整 real binding + 设备模块，fail closed）
+- `tools/fit_dtb_patch.py`：**FIT 感知**的 DTB 补丁（p3 是 FIT 容器，真正的 DTB 在 `/images/fdt`）；分析/提取/打补丁/更新 hash，拒绝签名镜像。PC 已验证
 - `tools/probe_enumeration.sh`：板上**只读**枚举取证脚本（改前/改后各跑一次；
   只读契约由 `tests/test_probe_tool.py` 守卫）
-- `tools/run_pcie1_bringup.sh`：串口 root 一键启用 `pcie@2a210000`（备份+补丁+校验，可选重启）
-- `PCIE_BRINGUP_RUNBOOK.md`：打开 `pcie@2a210000` 的一次性维护手册（需协调窗口、
-  串口 root、重启；含回滚）
+- `tools/run_pcie1_bringup.sh`：串口 root 分析入口（当前**只读**；in-place apply 待下一版）
+- `PCIE_BRINGUP_RUNBOOK.md`：打开 `pcie@2a210000` 的维护手册（FIT 感知；含厂商优先路线与回滚）
+- `VENDOR_PCIE_REFERENCE.md`：厂商 `AFC03_IMX415_PCIE_X1` 例程制品（endpoint bit / 驱动 / PERST 坑）
 - `tests/`：mock 设备与状态机/守卫单测，纯内存，无延迟宣称
 
 ## PC 侧运行（不登录板卡）
@@ -31,6 +32,7 @@ python -B -m unittest pcie_transport.tests.test_transport -v
 python -B -m unittest pcie_transport.tests.test_patch_tool -v
 python -B -m unittest pcie_transport.tests.test_probe_tool -v
 python -B -m unittest pcie_transport.tests.test_op_test_runner -v
+python -B -m unittest pcie_transport.tests.test_fit_dtb_patch -v
 python -B -m pcie_transport.oracle_test --rounds 30 --mock
 ```
 

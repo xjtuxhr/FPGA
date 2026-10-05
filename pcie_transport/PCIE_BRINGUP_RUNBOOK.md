@@ -18,6 +18,11 @@
 
 → PCIe 端点不出现是因为**设备树关了控制器**，不是驱动缺失。打开需改 DTB + 重启。
 
+**重要（2026-10-05 复核修正）**：`/dev/mmcblk0p3` 是 **U-Boot FIT 容器**（外层 FDT），**不是**裸内核 DTB。真正的 DTB 是 `/images/fdt`（`type=flat_dt`、`compression=none`）在 `data-position`/`data-size` 处的 payload。
+- 因此旧的 `patch_pcie1_dtb.py`（把 p3 当裸 DTB）**找不到 `pcie@2a210000`**，无法启用 PCIe（会 fail-closed）。
+- 正确做法：用 `fit_dtb_patch.py` 解析 FIT → 提取 `/images/fdt` → 改其中的 `status` → 同长回写；若该 image 有 `hash` 节点需同步更新，遇到 `signature` 节点**拒绝**。
+- 厂商 `07_异构教程\boot.img`（FIT）的嵌入 DTB **已经是 `pcie@2a210000 = okay`**；厂商 readme 也建议升级 `boot.img`。见 [厂商参考](VENDOR_PCIE_REFERENCE.md)。
+
 ## 1. 硬前提
 
 1. **协调**：另一操作者明确回复“板卡空闲”，并同意重启窗口（重启会断掉所有 SSH、清掉 NPU 状态）。
@@ -33,16 +38,20 @@ bash /home/kvdev/work_pc2_pcie/probe_enumeration.sh /home/kvdev/work_pc2_pcie/ev
 # 期望：RESULT: NO_PCI_ENDPOINT，pcie@2a210000/status = disabled
 ```
 
-### 2b. 串口 root shell：先 dry-run，再打补丁
+### 2b. 串口 root shell：先只读分析 FIT（当前版本不写入）
 ```bash
-python3 /home/kvdev/work_pc2_pcie/patch_pcie1_dtb.py --check-only
-# 期望：status = b'disabled\0'，且 [cross-check] p3 DTB matches running kernel DTB
-
-python3 /home/kvdev/work_pc2_pcie/patch_pcie1_dtb.py
-# 行为：写 /userdata/p3_dtb_backup_<ts>.bin → 原地把 pcie@2a210000 改为 okay → 复查
-sync
+python3 /home/kvdev/work_pc2_pcie/fit_dtb_patch.py --fit /dev/mmcblk0p3 --check
+# 期望：/images/fdt 的 position/size、pcie@2a200000/2a210000 状态、是否有 hash/signature 节点
 ```
-工具失败即停（`PATCH_FAILED`），保留输出，不要手工改 DTB。
+**in-place apply 尚未启用**（下一版：备份 → 写 → readback → 校验 kernel/resource 未变；见 §2c-待办）。
+首选替代：按厂商流程**刷 `boot.img`**（其嵌入 DTB 已使能 pcie1），见 [厂商参考](VENDOR_PCIE_REFERENCE.md)。
+
+### 2c-待办（下一版最低要求，来自 PC1 handoff）
+1. FIT 离线审查/修改：核对 fdt payload hash、compatible、PHY/reset/供电、running tree；
+   先在 PC 镜像文件上验证并输出前后 hash + 精确 diff。
+2. 安全写盘入口：严格身份检查、check-only 零写、唯一持久备份 + 完整 SHA + 读回、fsync/readback、
+   未修改区域校验、失败即停、不自动重启/重试、不 `ls|tail` 选备份。
+3. 真实 runbook + 修订文件/hash + 无法进 Linux 的恢复入口；两端操作者批准同一方案、板卡空闲才执行。
 
 ### 2c. 重启
 ```bash
