@@ -1,0 +1,9 @@
+# iverilog / TD 生成物，不入库
+*.vvp
+*.vcd
+*.area
+*.log
+*.db
+*.bit
+*.rpt
+*.json.bak

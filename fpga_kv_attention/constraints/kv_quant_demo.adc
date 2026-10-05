@@ -1,0 +1,12 @@
+# kv_quant_demo 引脚约束（无复位版，按 MLK-AFH03-AFC03 硬件手册填写）
+# FPGA = PH1A90SEG324
+# gpio 输出到 FMC HPC LA 引脚，需在 TD 引脚编辑器里再核对一遍。
+
+set_pin_assignment { clk      } { LOCATION = T16; IOSTANDARD = LVCMOS33; }  # FPGA_SYSCLK_25MHZ
+set_pin_assignment { gpio[0]  } { LOCATION = C14; IOSTANDARD = LVCMOS33; }  # FMC_HPC_LA00_CC_P
+set_pin_assignment { gpio[1]  } { LOCATION = D14; IOSTANDARD = LVCMOS33; }  # FMC_HPC_LA03_P
+set_pin_assignment { gpio[2]  } { LOCATION = G17; IOSTANDARD = LVCMOS33; }  # FMC_HPC_LA08_P
+set_pin_assignment { gpio[3]  } { LOCATION = H16; IOSTANDARD = LVCMOS33; }  # FMC_HPC_LA12_P
+
+# 时序约束（25MHz）
+# create_clock -period 40.000 -name clk [get_ports clk]
