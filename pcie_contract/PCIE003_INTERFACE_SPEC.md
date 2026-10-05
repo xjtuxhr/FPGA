@@ -1,8 +1,13 @@
-# PCIE-003 接口 spec（草案，PC2）
+# PCIE-003 接口 spec（PC2）
 
-状态：**DRAFT / 未冻结**。与 `contract.json` v2 对齐；逻辑线格式已确定，**BAR/地址/FIFO 实测**待实板枚举后填入 `TRANSPORT_BINDING.md`。
-来源：本草案综合 `contract.json`、`README.md`、以及 FPGA 侧（B）`PCIE003_FPGA_REPLY.md` 的逐条确认。
-不证明任何 Gate 通过；不改 `contract.json` 之前，一切以现有 codec 为准。
+状态：**逻辑接口已与 B 对齐（冻结候选）**；`contract.json` 无改动（线格式不变）。**BAR/地址/FIFO 实测**待实板枚举后填入 `TRANSPORT_BINDING.md`。
+来源：`contract.json` v2、`README.md`、FPGA 侧（B）`PCIE003_FPGA_REPLY.md` / `PCIE003_FPGA_REPLY2.md`。
+不证明任何 Gate 通过。
+
+## 变更记录
+
+- 2026-10-05 v0.1：初稿（DRAFT）。
+- 2026-10-05 v0.2：按 B 的 `REPLY2` 定稿逻辑层——FIFO 2048/1024、独立 status 字、32→FP16 归 B、softmax 优化在计划内；解决 O1–O3。
 
 ## 1. 线格式（沿用契约 v2，不变）
 
@@ -16,7 +21,7 @@
 - 元数据：`layer=0..29`、`position=0..2047`；`seq` 非零递增、响应原样回显；**单请求在途**；无隐式 reset。
 - 张量布局：head-major，每 head 64 项连续；`Q[9,64] → K[3,64] → V[3,64]`；`kv_head = q_head // 3`。
 
-## 2. 每层数据流（B 已确认，C1 笔误已澄清）
+## 2. 每层数据流（B 已确认）
 
 ```text
 H2C 1920B：Q576 + K192 + V192（仅当前 token）
@@ -25,25 +30,27 @@ H2C 1920B：Q576 + K192 + V192（仅当前 token）
   → C2H 1152B：attention output 576（FP16）
 ```
 
-- **PCIe 只传当前 token**；KV 历史不走上链（与契约/方案 C 一致）。
+- **PCIe 只传当前 token**；KV 历史不走上链。
 - `start`：无独立握手线，等价于"收到本层请求第一拍"，由 header 的 layer/position/seq 触发。
 - `done`：**FPGA 逻辑算完**（output 已就绪、可被 C2H 读走），**不含** C2H 到 host 的同步/校验。
 
-## 3. 传输层约定（来自 B）
+## 3. 传输层约定（B 已确认）
 
-- 数据通路 **AXI-ST 风格**（`valid`/`last`/`ready` 背压），**不用 AXI-MM**。
-- FPGA 侧 **收 FIFO 512×16bit、发 FIFO 512×16bit**（首版，可调）。
-- 背压只拉低 `ready`，不阻塞 host 侧 SGDMA 的 H2C / notification。
+- 数据通路 **AXI-ST 风格**（`valid`/`last`/`ready` 背压），**不用 AXI-MM**；**数据通路 = SGDMA user 设备**（H2C/C2H）。`TLAST/TKEEP` 与背压确切时序待枚举后与官方例程对齐（PC2 绑定）。
+- FPGA 侧 FIFO（v0.2）：
+  - **收 FIFO 2048×16bit = 4096B**（容 1 帧 1952B + 余量）；
+  - **发 FIFO 1024×16bit = 2048B**（容 C2H 帧 1184B + 余量）。
+- **首版不依赖帧中途背压**：整帧进 FIFO 再处理，回避"SGDMA 长时间 stall 是否安全"的未验证点。若 DDR 写吞吐跟不上 H2C 到达率，再单独测背压（归 DDR-002）。
 - host 侧复用官方 **SGDMA 字符设备**：H2C/C2H 传 tensor；控制优先 user 节点 32bit pread/pwrite；保留官方 DMA 完成中断。
 
-## 4. 完成与错误语义
+## 4. 完成与错误语义（status 字）
 
-- 契约模型：`RESULT_READY` 表示 output 稳定；仍须 C2H 完整读回 + seq/length/CRC/tensor 校验后 `CONSUMED`；任一错误 → `FAULT`。
-- B 提供 **status 字 = DONE + error 码**：`0=OK, 1=SEQ_ERR, 2=LAYER_ERR, 3=CRC_ERR`。
-- **待决（spec 需拍板）**：
-  - transport 层错误（header magic/version/length/CRC 不符、seq 回显不符）→ 直接 `FAULT`。
-  - 语义错误（SEQ_ERR/LAYER_ERR）由 FPGA status 返回，transport 映射到 `FAULT` 并按 `README §6` 走显式 reset 恢复。
-  - error 码是**并入契约 response header**，还是**独立 status 寄存器**（transport 用 control 读）？PC2 倾向后者（不改线帧、对契约破坏最小）。
+- **独立 status 字**（32-bit，4B control pread 读），不改线帧：
+  - `[0]` = **DONE**（本层逻辑算完、output 就绪）
+  - `[3:1]` = **ERR**（`0=OK, 1=SEQ_ERR, 2=LAYER_ERR, 3=CRC_ERR`）
+  - `[31:4]` = reserved（后续放 perf counter / layer / position）
+- **读序**：host **先读 status**（poll DONE / 等完成中断）；`ERR=0` 才读 C2H；`ERR≠0` 走显式 reset 恢复，**不读 C2H**。
+- transport 层错误（header magic/version/length/CRC 不符、seq 回显不符）→ 直接 `FAULT`；语义错误（SEQ_ERR/LAYER_ERR）由 status 返回并映射到 `FAULT` + 显式 reset。
 
 ## 5. 性能（B 估算，首版上界，非验收值）
 
@@ -54,8 +61,8 @@ H2C 1920B：Q576 + K192 + V192（仅当前 token）
 | 88.9 MHz | ~8.8 ms/层 |
 | 30 层 | **~264 ms/token**（首版上界） |
 
-- 主要固定开销：softmax 的 32 拍除法；可换快速倒数 / 并行 head 优化。
-- 该数字必须代入 `PLAN_C_VS_RK_ONLY_DECISION.md` 的收支平衡公式，与 RK-only 基线对比（勿单看 attention）。
+- 主要固定开销：softmax 的 32 拍除法；**B 计划内首要优化**（快速倒数 / 并行 head），会显著压低上界。
+- 该数字须如实代入 `PLAN_C_VS_RK_ONLY_DECISION.md` 的收支平衡，与 RK-only 基线对比（勿单看 attention）。
 
 ## 6. 计时与验收边界
 
@@ -66,14 +73,14 @@ H2C 1920B：Q576 + K192 + V192（仅当前 token）
 
 ## 7. 开放/待决（TODO）
 
-| # | 项 | 归口 |
-|---|---|---|
-| O1 | **FIFO 512×16bit = 1024B < 一帧 1952B**：单帧超 FIFO，需 ≥ 一帧 或确认 AXI-ST/SGDMA 支持帧中途背压 | B / PC2 |
-| O2 | error 码并入契约 vs 独立 status 寄存器 | B / PC2 |
-| O3 | 32→FP16 转换/舍入模块（B 未实现），依赖 NUM-001 | B / PC1 |
-| O4 | BAR / 地址公式 / 实际 FIFO 深度（枚举后填 binding） | PC2 |
-| O5 | 生产 QKV/output dtype/scale/layout（NUM-001） | PC1 |
-| O6 | AXI-ST 数据通路是否即 SGDMA user 设备、`TLAST/TKEEP`/背压实测 | PC2 |
+| # | 项 | 状态 | 归口 |
+|---|---|---|---|
+| O1 | FIFO 深度 ≥ 一帧 | ✅ 解决：收 2048×16bit、发 1024×16bit，不走帧中途背压 | B |
+| O2 | error 码放哪 | ✅ 解决：独立 status 字（`[0]`DONE / `[3:1]`ERR） | B/PC2 |
+| O3 | 32→FP16 转换模块 | ✅ 解决：**B 实现**（`q88_to_fp16` 占位先行），NUM-001 冻结后只改舍入/scale | B/PC1 |
+| O4 | BAR / 地址公式 / 实际 FIFO 深度 | 待枚举后填 binding | PC2 |
+| O5 | 生产 QKV/output dtype/scale/layout（NUM-001） | 待 PC1 冻结 | PC1 |
+| O6 | AXI-ST `TLAST/TKEEP`/背压实测 | 待枚举后与官方例程对齐 | PC2 |
 
 ## 8. 变更流程
 
