@@ -88,3 +88,9 @@ class MockDevice:
         self.pending_response = None
         self.pending_seq = None
         self.ready_seq = None
+
+
+def make_device(binding):
+    """Board-runner hook for PC self-tests only (never board evidence)."""
+    del binding
+    return MockDevice()
