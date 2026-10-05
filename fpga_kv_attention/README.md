@@ -7,7 +7,7 @@
 ## 目录
 
 ```text
-rtl/          算子 Verilog 源码（16 个文件）
+rtl/          算子 Verilog 源码（19 个文件，含真实尺寸综合顶层）
 sim/          自校验 testbench（iverilog，14 个）
 golden/       Python 对拍向量生成器 + 轻量 golden 向量（.hex）
 td/           TD 批处理综合脚本
@@ -43,6 +43,7 @@ constraints/  板级引脚约束（kv_quant_demo 演示顶层）
 | `gqa_attention` | GQA 头复用（`g = h / NGROUPS`，SmolLM-135M：H=9/G=3/D=64） |
 | `kv_quant_demo` | 板级演示顶层（量化到 FMC LA 引脚） |
 | `kv_ops_top` | 综合冒烟测试顶层（实例化全部算子） |
+| `gqa_synth_t64/128/256` | GQA 真实尺寸综合顶层（H=9/G=3/D=64，扫 T） |
 
 ## 仿真（iverilog）
 
@@ -64,10 +65,22 @@ vvp gqa_tb   # gqa_attention: ALL 16 outputs PASSED
 ```
 
 冒烟测试资源（PH1A90SEG324，D=8/T=4）：LUT 2324、reg 1676、ERAM 2/272、DSP 10/240。
-真实尺寸（D=64）的 ERAM/DSP 评估待放大参数后确认；store-then-compute 架构的 K/V 片内存储会随 context 长度 T 线性增长，是主要资源项。
+
+真实尺寸综合（SmolLM-135M：H=9/G=3/D=64，`td/synth_gqa.tcl` + `td/timing.sdc` 25MHz 约束，
+顶层 `rtl/gqa_synth_t64/t128/t256.v`）：
+
+| T | ERAM | ERAM% | DSP | LUT | Slice% | dist-RAM(LUT) | Fmax | SWNS |
+|---|---|---|---|---|---|---|---|---|
+| 64 | 21 | 7.7% | 4 | 3589 | 5.1% | 2128 | 88.7 MHz | +28.7 ns |
+| 128 | 41 | 15.1% | 4 | 6458 | 9.7% | 4240 | 83.7 MHz | +28.1 ns |
+| 256 | 79 | 29.0% | 4 | 12232 | 18.2% | 8464 | 78.1 MHz | +27.2 ns |
+
+结论：ERAM 随 T 线性增长（T=256 用 29%）、DSP 恒定 4、时序富余（Fmax 78–88 MHz ≫ 25 MHz）。
+store-then-compute 架构的 K/V 片内存储是主要资源项，当前存在双重存储（gqa 存全量 + attention 再存单头）
+与部分分布式 RAM，后续需优化（见 RTL-001/RTL-002）。
 
 ## 验证状态
 
 - 仿真：所有算子 testbench 与 Python 定点对拍 **全部通过**（含 GQA 头复用 16 输出）。
 - 综合：TD `import_device ph1_90.db -package PH1A90SEG324` 下 `optimize_rtl` + `optimize_gate` 通过，0 错误。
-- 未做：布局布线、时序收敛、板上 DDR/PCIe 接入、RPC tail 管理（M 方案）。
+- 未做：布局布线（P&R）与 P&R 后时序收敛、板上 DDR/PCIe 接入、RPC tail 管理（M 方案）。

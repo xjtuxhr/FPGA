@@ -38,7 +38,7 @@ module gqa_attention #(
     reg signed [DATA_W-1:0] v_ram [0:G-1][0:T-1][0:D-1];
 
     reg [3:0] state;
-    reg [7:0] cnt;      // 通用计数器（输入/喂入元素计数）
+    reg [15:0] cnt;     // 通用计数器（输入/喂入元素计数，需覆盖 G*T*D=49152）
     reg [7:0] h_idx;
     reg [7:0] t_idx, d_idx;
     wire [7:0] g_idx = h_idx / NGROUPS;
