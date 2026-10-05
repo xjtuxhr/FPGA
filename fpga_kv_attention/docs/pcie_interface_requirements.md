@@ -1,17 +1,17 @@
 # FPGA 侧 PCIe 接口需求（给 PC2，PCIE-003）
 
-> 本文由 FPGA 侧（B）起草。FPGA endpoint 需要的输入/输出接口，已对应到 `rtl/attention_b_top.v` 的端口。
+> 本文由 FPGA 侧（B）起草。**PCIe endpoint 只传当前 token 的 Q/K/V（共 1920B）**；整段历史 K/V 是 FPGA 内部（从 DDR 读）接口，不是 PCIe 接口。
 
-## FPGA endpoint 需要的输入（每层一次）
+## FPGA endpoint 需要的输入（每层一次，只当前 token）
 
 | 信号 | 数据 | 说明 |
 |---|---|---|
-| `start` | 1 bit 脉冲 | 整层开始 |
-| `q_valid` + `q_fp16[15:0]` | 9×64 个 FP16 | 查询 Q，流式 |
-| `k_valid` + `k_fp16[15:0]` | 3×T×64 个 FP16 | 键 K，流式 |
-| `v_valid` + `v_fp16[15:0]` | 3×T×64 个 FP16 | 值 V，流式 |
+| `start` | 1 bit 脉冲（或由 header 触发） | 整层开始 |
+| `q_valid` + `q_fp16[15:0]` | 9×64 = 576 个 FP16 | 查询 Q，流式 |
+| `k_valid` + `k_fp16[15:0]` | 3×64 = 192 个 FP16 | 键 K（当前 token），流式 |
+| `v_valid` + `v_fp16[15:0]` | 3×64 = 192 个 FP16 | 值 V（当前 token），流式 |
 
-（顺序与 `attention_b_top` 一致：先 Q，再 K，再 V，各带 valid 握手。）
+（H2C 合计 1920B；Q→K→V 顺序，head-major。历史 K/V 由 FPGA 存 DDR、attention 时自读，不走 PCIe。）
 
 ## FPGA endpoint 的输出（每层一次）
 

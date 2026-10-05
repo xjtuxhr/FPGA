@@ -7,8 +7,8 @@
 ## 目录
 
 ```text
-rtl/          算子 Verilog 源码（25 个文件，含综合顶层 + KV 存储/RPC 控制）
-sim/          自校验 testbench（iverilog，20 个）
+rtl/          算子 Verilog 源码（26 个文件，含综合顶层 + KV 存储/RPC 控制）
+sim/          自校验 testbench（iverilog，21 个）
 golden/       Python 对拍向量生成器 + 轻量 golden 向量（.hex）
 td/           TD 批处理综合脚本
 constraints/  板级引脚约束（kv_quant_demo 演示顶层）
@@ -46,6 +46,7 @@ docs/         接口需求文档（DDR/量化格式/PCIe，发给队友对齐用
 | `kv_ops_top` | 综合冒烟测试顶层（实例化全部算子） |
 | `gqa_synth_t64/128/256` | GQA 真实尺寸综合顶层（H=9/G=3/D=64，扫 T） |
 | `fp16_to_q88` | FP16 → Q8.8 转换器（NUM-009，组合逻辑，subnormal→0、inf/NaN→饱和） |
+| `q88_to_fp16` | Q8.8 → FP16 转换器（`fp16_to_q88` 的逆，NUM-001 占位） |
 | `attention_b_top` | Attention-only B 通路顶层（FP16 Q/K/V → Q8.8 → GQA attention） |
 | `attention_b_synth` | B 通路综合顶层（真实尺寸） |
 | `kv_rpc_ctrl` | RPC tail 管理控制状态机（M 方案：环形窗口 + recent 边界 + requant 命令） |
@@ -90,6 +91,6 @@ Attention-only B 通路（`td/synth_b.tcl`，含 fp16_to_q88 转换器，D=64/T=
 
 ## 验证状态
 
-- 仿真：所有算子 testbench 与 Python 定点对拍 **全部通过**；D=64 GQA 端到端 576 输出、FP16→Q8.8 转换器 249 用例、Attention-only B 通路端到端 576 输出、RPC tail 控制、KV 地址映射、KV 存储骨架均通过。
+- 仿真：所有算子 testbench 与 Python 定点对拍 **全部通过**；D=64 GQA 端到端 576 输出、FP16→Q8.8 转换器 249 用例、Q8.8→FP16 转换器 232 用例、Attention-only B 通路端到端 576 输出、RPC tail 控制、KV 地址映射、KV 存储骨架均通过。
 - 综合：TD `import_device ph1_90.db -package PH1A90SEG324` 下 `optimize_rtl` + `optimize_gate` 通过，0 错误（D=8 冒烟、D=64 GQA 三档、B 通路均干净）。
 - 未做：布局布线（P&R）与 P&R 后时序收敛、板上 DDR/PCIe 接入、真实 quant 接入存储骨架（requant 目前是占位标记）。
