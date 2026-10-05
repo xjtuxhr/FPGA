@@ -4,6 +4,8 @@
 它**会改 DTB 并重启整块板**，属于系统级变更：执行前必须按 [COOPERATION.md](../pcie_contract/COOPERATION.md)
 取得板卡操作者与另一方的批准，并列出目标/副作用/恢复。当前不宣称任何 PCIe Gate 通过。
 
+> **首选路线**：先用厂商 `AFC03_IMX415_PCIE_X1` 例程的 endpoint bit + 驱动打通链路（含 **PERST#/电源 GPIO**，见 [厂商参考](VENDOR_PCIE_REFERENCE.md)）。仅改 DTB status **可能不够**。FPGA 必须先烧好 endpoint bit。
+
 ## 0. 根因（只读证据，2026-10-05）
 
 板子（`linaro-alip`，Debian 12，kernel 6.1.99）上只读观察：
@@ -63,7 +65,13 @@ bash /home/kvdev/work_pc2_pcie/probe_enumeration.sh /home/kvdev/work_pc2_pcie/ev
 
 ## 3. 若打开了控制器仍无端点
 
-大概率 **FPGA bitstream 未带 PCIe endpoint**（当前 FPGA 只跑通了 MIPI 通路）。这属于 FPGA 侧配置，需与 FPGA 负责人协调，不在本手册范围。
+按优先级排查（详见 [厂商参考](VENDOR_PCIE_REFERENCE.md)）：
+
+1. **FPGA 未烧 endpoint bit**：当前 FPGA 只有纯逻辑（B 已确认无 endpoint bitstream）。需先烧厂商 `imx415_pcie_4k.bit`（sha256 `CB7819...CDF`）或用 TD 生成带 endpoint 的 bit。
+2. **PERST# / 电源未处理**：厂商 `pcie1_enable.sh` 会拉 **PERST#(gpio-48)**、使能 **vcc3v3_pcie(gpio-124)**，并由 systemd 服务 `pcie1-fpga` 开机执行。只改 DTB status 可能不足以释放 FPGA 复位。
+3. **SGDMA 驱动未加载**：厂商 `deploy/sgdma_drv` 需编译/加载后才有 `/dev/ANLOGIC*`、`/dev/sgdma*`。
+
+以上任一都需 FPGA 老师 / 现场配合，属系统变更，不在"仅改 DTB"范围。
 
 ## 4. 回滚（串口 root）
 
