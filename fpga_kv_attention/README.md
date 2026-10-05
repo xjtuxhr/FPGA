@@ -7,8 +7,8 @@
 ## 目录
 
 ```text
-rtl/          算子 Verilog 源码（19 个文件，含真实尺寸综合顶层）
-sim/          自校验 testbench（iverilog，14 个）
+rtl/          算子 Verilog 源码（22 个文件，含综合顶层）
+sim/          自校验 testbench（iverilog，17 个）
 golden/       Python 对拍向量生成器 + 轻量 golden 向量（.hex）
 td/           TD 批处理综合脚本
 constraints/  板级引脚约束（kv_quant_demo 演示顶层）
@@ -44,6 +44,9 @@ constraints/  板级引脚约束（kv_quant_demo 演示顶层）
 | `kv_quant_demo` | 板级演示顶层（量化到 FMC LA 引脚） |
 | `kv_ops_top` | 综合冒烟测试顶层（实例化全部算子） |
 | `gqa_synth_t64/128/256` | GQA 真实尺寸综合顶层（H=9/G=3/D=64，扫 T） |
+| `fp16_to_q88` | FP16 → Q8.8 转换器（NUM-009，组合逻辑，subnormal→0、inf/NaN→饱和） |
+| `attention_b_top` | Attention-only B 通路顶层（FP16 Q/K/V → Q8.8 → GQA attention） |
+| `attention_b_synth` | B 通路综合顶层（真实尺寸） |
 
 ## 仿真（iverilog）
 
@@ -79,8 +82,10 @@ vvp gqa_tb   # gqa_attention: ALL 16 outputs PASSED
 store-then-compute 架构的 K/V 片内存储是主要资源项，当前存在双重存储（gqa 存全量 + attention 再存单头）
 与部分分布式 RAM，后续需优化（见 RTL-001/RTL-002）。
 
+Attention-only B 通路（`td/synth_b.tcl`，含 fp16_to_q88 转换器，D=64/T=64）：LUT 3691、ERAM 21/272、DSP 4/240、Fmax 88.9 MHz（SWNS +28.8ns）。转换器仅 +102 LUT，对时序无影响。
+
 ## 验证状态
 
-- 仿真：所有算子 testbench 与 Python 定点对拍 **全部通过**（含 GQA 头复用 16 输出）。
-- 综合：TD `import_device ph1_90.db -package PH1A90SEG324` 下 `optimize_rtl` + `optimize_gate` 通过，0 错误。
+- 仿真：所有算子 testbench 与 Python 定点对拍 **全部通过**；D=64 GQA 端到端 576 输出、FP16→Q8.8 转换器 249 用例、Attention-only B 通路端到端 576 输出均通过。
+- 综合：TD `import_device ph1_90.db -package PH1A90SEG324` 下 `optimize_rtl` + `optimize_gate` 通过，0 错误（D=8 冒烟、D=64 GQA 三档、B 通路均干净）。
 - 未做：布局布线（P&R）与 P&R 后时序收敛、板上 DDR/PCIe 接入、RPC tail 管理（M 方案）。
