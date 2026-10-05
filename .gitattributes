@@ -1,0 +1,7 @@
+# Keep shell/python/markdown as LF in the repo so board-side scripts
+# transferred from a Windows checkout do not get CRLF corruption.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
