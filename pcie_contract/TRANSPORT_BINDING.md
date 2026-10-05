@@ -2,6 +2,23 @@
 
 状态：**UNBOUND**。本文件是验收/证据模板，不是可执行配置。UNKNOWN 的状态只在 `docs/UNKNOWNS.md` 更新。未完成绑定时 codec 只在 PC 使用，不打开设备、不写 BAR。
 
+## 只读观察证据（2026-10-05，非绑定）
+
+以下为 PC（`192.168.137.1`）只读巡检 `192.168.137.101`（`kvdev@linaro-alip`）所得，**不构成 binding、不证明 Gate 通过**。采集脚本：`pcie_transport/tools/probe_enumeration.sh`（只读，已上板验证，输出 `RESULT: NO_PCI_ENDPOINT`）；原始日志是本地 artifact（`pcie_transport/evidence/`，已 gitignore，可随时重跑复现），不随仓库提交。
+
+| 项目 | 观察值 |
+|---|---|
+| 板卡 | Debian 12 bookworm，kernel `6.1.99 #3` aarch64，host `linaro-alip`；板上时钟错误（显示 ~2026-04，勿信其时间戳） |
+| 执行用户/组 | `kvdev`（uid 1002），组 `users,render`（v32 时含 `video`） |
+| PCIe 控制器 DT | `pcie@2a200000` 与 `pcie@2a210000` 均 `status = disabled` |
+| 枚举 | `lspci` 空、`/sys/bus/pci/devices` 空 |
+| 平台驱动 | `rk-pcie`/`rockchip-pcie` 存在但未 probe |
+| 设备节点 | **无** `/dev/ANLOGIC*`、**无** `/dev/sgdma*` |
+| NPU/显示（参考） | `/dev/dri/{card0,card1,renderD128,renderD129}`、`/dev/mpp_service`；RKNPU 0.9.8 |
+| 结论 | 端点缺失根因是 **DTB 关闭控制器**；打通步骤见 `pcie_transport/PCIE_BRINGUP_RUNBOOK.md`（需协调窗口 + 串口 root + 重启） |
+
+**UNBOUND 原因**：尚无 BDF、driver、H2C/C2H/control 节点、BAR、地址公式、DMA 限制等实测证据。
+
 ## 已选择的实现方向
 
 沿用官方 SGDMA 字符设备：H2C/C2H 传 tensor；控制优先 user 节点的 32bit pread/pwrite。暂不引入新 kernel driver、raw mmap 或最终 production register map。

@@ -8,3 +8,8 @@
 
 __pycache__/
 *.pyc
+
+# board evidence logs are local artifacts, not committed (see COOPERATION.md)
+/pcie_transport/evidence/
+/pcie_transport/*.log
+
