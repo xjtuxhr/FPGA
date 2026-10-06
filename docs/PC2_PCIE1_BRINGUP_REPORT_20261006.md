@@ -14,7 +14,8 @@ RK3576 侧 PCIe1 已从**完全不通**推进到**链路通 + 驱动/寄存器�
 - 链路：`PCIe Gen.2 x1 link up`，FPGA endpoint `1edb:abcd` 在 `0000:21:00.0` 枚举。
 - 驱动：`anlogic_pci` 绑定，节点 `/dev/ANLOGIC-PCI0_{user,control,h2c_0,c2h_0}`（`root:kvdev 0660`）。
 - 数据通路：从 RK 用户态读到 FPGA 寄存器（`VERSION=0x56440013`）；H2C 1920B 写 200/200 成功，延迟 P50 30.2µs / P99 104.8µs。
-- 仅剩：**C2H / 完整往返需 B 的 FPGA endpoint 或回环 bit**（等综合）。
+- **RAW H2C→C2H 回环已确认**（B 的回环 bit 已上板）：1920B ×100 OK、0 错误，往返 P50 118µs / P99 184.6µs（`tools/pcie_loopback.py`；**需并发读写**）。
+- 仅剩：**v2 endpoint（RESET/OP_TEST/ATTENTION）仍需 B 的 bit**——当前是原始回环，无 32B 帧头/opcode。
 
 ---
 
@@ -29,6 +30,7 @@ RK3576 侧 PCIe1 已从**完全不通**推进到**链路通 + 驱动/寄存器�
 | 驱动绑定 | `Anlogic-pcie`，`Mem+ BusMaster+` | `lspci -vv -s 21:00.0` |
 | 寄存器读 | `0x5C=0x56440013`(=FPGA `PHASE9_VERSION`)、`0x74=0x00000c01`(link_up=1) | ioctl `ANLOGIC_IOCR` 读 BAR0 |
 | H2C 数据通路 | 1920B ×200 全成功 | `/home/kvdev/pcie_roundtrip.py --mode h2c` |
+| **H2C→C2H 回环** | **1920B ×100 OK（P50 118µs）** | `pcie_loopback.py`（需并发读写） |
 | 开机自动 | pcie1-fpga + anlogic-sgdma 两服务 | 重启实测（无需手动） |
 
 ---
@@ -79,8 +81,9 @@ RK3576 侧 PCIe1 已从**完全不通**推进到**链路通 + 驱动/寄存器�
 
 - 本汇报：`docs/PC2_PCIE1_BRINGUP_REPORT_20261006.md`
 - 给 B 的 AXI-ST 接口：`docs/PC2_TO_B_SGDMA_AXIST_INTERFACE.md`（设备名/信号/TLAST/TKEEP/背压/完成通知/寄存器）
-- 给 PC1 的操作单：`docs/PC1_SGDMA_PERMISSION_TODO_20261006.md`
-- 板上：`/home/kvdev/pcie_roundtrip.py`、`/home/kvdev/smoke_regs.py`、两个 systemd 服务 + `anlogic_pci.ko` + p3 原始备份
+- 给 PC1 的操作单 + 联调入口：`docs/PC1_SGDMA_PERMISSION_TODO_20261006.md`、`pcie_transport/ENDPOINT_STATUS_20261006.md`
+- 仓库源码：`pcie_transport/tools/{pcie_loopback,pcie_roundtrip,probe_c2h,smoke_regs}.py`
+- 板上：`/home/kvdev/{pcie_loopback,pcie_roundtrip,probe_c2h,smoke_regs}.py`、两个 systemd 服务 + `anlogic_pci.ko` + p3 原始备份
 
 ---
 
@@ -101,9 +104,9 @@ RK3576 侧 PCIe1 已从**完全不通**推进到**链路通 + 驱动/寄存器�
 
 | 项 | 负责 | 状态 |
 |---|---|---|
-| B 回环 bit（`usr_loopback.v` 逻辑就绪，待厂商 IP 工程综合） | B/老师 | ⬜ |
-| B attention endpoint（按 AXI-ST 文档） | B | ⬜ |
-| C2H 1152B 与完整往返延迟（`pcie_roundtrip.py --mode roundtrip --verify`） | PC2 | ⬜ 等 bit |
+| B 回环 bit（H2C→C2H） | B/老师 | ✅ 已上板确认（1920B×100 OK，P50 118µs） |
+| B **v2 endpoint**（`RESET_CACHE`/`TEST`(OP_TEST)/`ATTENTION`） | B | ⬜ 待做 |
+| framed v2 `OP_TEST` 30 轮 / Attention 延迟 | PC2 | ⬜ 等 v2 bit |
 | 可选：pcie1 加 `reset-gpios`/`vpcie3v3-supply`（消除开机 regulator WARNING） | PC2 | 可选，非阻塞 |
 
 ---
@@ -113,4 +116,4 @@ RK3576 侧 PCIe1 已从**完全不通**推进到**链路通 + 驱动/寄存器�
 - 重刷 p3 会覆盖当前配置；已在 `/userdata`、`/home/kvdev` 留原始备份。
 - 开机 `pcie1-fpga` 会打印一条 `WARNING ... regulator_unregister`（无害）。
 - **不要**盲跑 `pcie_setup.sh` / `pcie1_enable.sh` / `build_drivers.sh` 等（有写盘/重编译/重绑副作用，本板已用另一套方案）。
-- 本轮只证明 PCIe1 链路、驱动、寄存器读、H2C 写通路；**未宣称** C2H 或 Attention 通路通过。
+- 本轮证明：PCIe1 链路、驱动、寄存器读、H2C 写、**RAW H2C→C2H 回环**；**未宣称** v2 framed / `OP_TEST` / `ATTENTION` 通过。
