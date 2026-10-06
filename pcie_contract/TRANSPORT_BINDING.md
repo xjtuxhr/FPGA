@@ -17,7 +17,18 @@
 | NPU/显示（参考） | `/dev/dri/{card0,card1,renderD128,renderD129}`、`/dev/mpp_service`；RKNPU 0.9.8 |
 | 结论 | 端点缺失根因是 **DTB 关闭控制器**；打通步骤见 `pcie_transport/PCIE_BRINGUP_RUNBOOK.md`（需协调窗口 + 串口 root + 重启） |
 
-**UNBOUND 原因**：尚无 BDF、driver、H2C/C2H/control 节点、BAR、地址公式、DMA 限制等实测证据。
+**UNBOUND 原因（更新 2026-10-06）**：BDF/driver/节点/BAR/寄存器通路/RAW H2C 已有实测证据（见下），但 **C2H 双向、DMA 限制、v2 framed、endpoint opcode** 尚未取得，binding 仍不完整，故保持 UNBOUND。
+
+## 枚举与能力观察证据（2026-10-06，PC2，实板）
+
+- 链路：`pcie@2a210000` DTB 已使能 → `21:00.0 [1edb:abcd]`，`PCIe Gen.2 x1 link up`；driver `Anlogic-pcie` 绑定（`Mem+ BusMaster+`）。
+- 节点：`/dev/ANLOGIC-PCI0_{user,control,h2c_0,c2h_0}`，`root:kvdev 0660`（udev `99-anlogic-pci.rules`）。
+- BAR：BAR0(user) 1M @ `0x21200000`，BAR1(config) 64K @ `0x21300000`；driver 记录 config bar=1 / user bar=0。
+- 地址公式：寄存器读走 `_control` + ioctl `ANLOGIC_IOCR`(`bar_id`/`bar_offaddr`)；FPGA app 寄存器在 BAR0（`0x5C`=VERSION=`0x56440013`）。
+- AXI-ST：PH1A 128-bit（`tdata[127:0]/tkeep[15:0]/tuser[15:0]/tlast/tvalid/tready`，H2C×1+C2H×1）；详见 `docs/PC2_TO_B_SGDMA_AXIST_INTERFACE.md`。
+- 已测：**RAW H2C 1920B 写 ×200 OK**（P50 30.2µs / P99 104.8µs，`pcie_transport/tools/pcie_roundtrip.py`）。
+- **未测/未支持**：RAW C2H（当前 bit 无匹配流）、完整 1152B 返回、DMA 对齐/粒度上限、v2 framed（1952B/1184B）、endpoint opcode（RESET/OP_TEST/ATTENTION）。
+- 当前 bitstream：`imx415_pcie_4k.bit`（摄像头例程，**不含 v2**）。见 `pcie_transport/ENDPOINT_STATUS_20261006.md`。
 
 ## 已选择的实现方向
 
