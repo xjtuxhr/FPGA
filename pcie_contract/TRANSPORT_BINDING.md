@@ -26,9 +26,9 @@
 - BAR：BAR0(user) 1M @ `0x21200000`，BAR1(config) 64K @ `0x21300000`；driver 记录 config bar=1 / user bar=0。
 - 地址公式：寄存器读走 `_control` + ioctl `ANLOGIC_IOCR`(`bar_id`/`bar_offaddr`)；FPGA app 寄存器在 BAR0（`0x5C`=VERSION=`0x56440013`）。
 - AXI-ST：PH1A 128-bit（`tdata[127:0]/tkeep[15:0]/tuser[15:0]/tlast/tvalid/tready`，H2C×1+C2H×1）；详见 `docs/PC2_TO_B_SGDMA_AXIST_INTERFACE.md`。
-- 已测：**RAW H2C 1920B 写 ×200 OK**（P50 30.2µs / P99 104.8µs，`pcie_transport/tools/pcie_roundtrip.py`）。
-- **未测/未支持**：RAW C2H（当前 bit 无匹配流）、完整 1152B 返回、DMA 对齐/粒度上限、v2 framed（1952B/1184B）、endpoint opcode（RESET/OP_TEST/ATTENTION）。
-- 当前 bitstream：`imx415_pcie_4k.bit`（摄像头例程，**不含 v2**）。见 `pcie_transport/ENDPOINT_STATUS_20261006.md`。
+- 已测：**RAW H2C 1920B 写 ×200 OK**（P50 30.2µs）；**RAW H2C→C2H 回环 1920B ×100 OK**（P50 118µs / P99 184.6µs，需并发读写，`pcie_transport/tools/pcie_loopback.py`）。
+- **未测/未支持**：v2 framed（1952B/1184B）、endpoint opcode（RESET/OP_TEST/ATTENTION）、DMA 对齐/粒度上限。
+- 当前 bitstream：**B 的 RAW 回环 bit**（2026-10-06，**不含 v2**）。见 `pcie_transport/ENDPOINT_STATUS_20261006.md`。
 
 ## 已选择的实现方向
 

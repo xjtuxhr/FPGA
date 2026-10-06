@@ -20,8 +20,10 @@ transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/�
 - `tools/fit_dtb_patch.py`：**FIT 感知**的 DTB 补丁（p3 是 FIT 容器，真正的 DTB 在 `/images/fdt`）；分析/提取/打补丁/更新 hash，拒绝签名镜像。PC 已验证
 - `tools/probe_enumeration.sh`：板上**只读**枚举取证脚本（改前/改后各跑一次；
   只读契约由 `tests/test_probe_tool.py` 守卫）
-- `tools/pcie_roundtrip.py`：**RAW** H2C/C2H 往返与延迟（实测 H2C 1920B×200 OK，
-  P50 30.2µs；C2H 待 endpoint）；与 framed v2 的 `run_op_test_on_board.py` 区分
+- `tools/pcie_loopback.py`：**RAW H2C→C2H 回环**确认+延迟（后台读线程并发排空；
+  实测 1920B ×100 OK，P50 118µs）
+- `tools/pcie_roundtrip.py`：**RAW** H2C/C2H 往返与延迟（H2C 1920B×200 OK，P50 30.2µs）
+- `tools/probe_c2h.py`：RAW C2H 读取探测（写 0xA5、读回看是否回环）
 - `tools/smoke_regs.py`：经 `_control` ioctl 读 FPGA 寄存器（冒烟，bar_id/offaddr）
 - `ENDPOINT_STATUS_20261006.md`：endpoint/transport 现状与联调入口（给 PC1）
 - `tools/run_pcie1_bringup.sh`：串口 root 分析入口（当前**只读**；in-place apply 待下一版）
