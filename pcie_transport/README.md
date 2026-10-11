@@ -1,8 +1,8 @@
 # PCIe transport 层（PC2）
 
-状态：**UNBOUND，PC-only**。本目录实现 v2 契约之上的设备 I/O 抽象与 OP_TEST
-30 轮串行基准，不打开真实设备、不写 BAR、不宣称任何板卡延迟，直到
-`TRANSPORT_BINDING.md` 的 binding 证据完整填入。
+状态：**BOUND（kind=real，2026-10-11）**。真实 SGDMA adapter（`sgdma_device.py`）
+已在 v2 endpoint 上跑通 framed v2 `OP_TEST` 30 轮 0 错误；binding 证据见
+[`bindings/board_20261011.json`](bindings/board_20261011.json)。`ATTENTION(op=0)` 仍未实现。
 
 协作边界见 [COOPERATION.md](../pcie_contract/COOPERATION.md)：PC2 负责 PCIe
 transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/数值格式或

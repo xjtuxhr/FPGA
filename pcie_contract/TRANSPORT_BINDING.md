@@ -1,6 +1,24 @@
 # Transport binding：先验证，再填值
 
-状态：**UNBOUND**。本文件是验收/证据模板，不是可执行配置。UNKNOWN 的状态只在 `docs/UNKNOWNS.md` 更新。未完成绑定时 codec 只在 PC 使用，不打开设备、不写 BAR。
+状态：**BOUND（kind=real，2026-10-11）**。机器可读绑定见 [`pcie_transport/bindings/board_20261011.json`](../pcie_transport/bindings/board_20261011.json)；真实 SGDMA adapter 见 [`pcie_transport/sgdma_device.py`](../pcie_transport/sgdma_device.py)。UNKNOWN 的状态只在 `docs/UNKNOWNS.md` 更新。
+
+## 绑定记录（BOUND，2026-10-11）
+
+在 v2 endpoint bit（`imx415_pcie_4k.bit`，sha256 `8FA867D7…BEF9`）上，用官方 runner `pcie_transport.tools.run_op_test_on_board` 跑通 framed v2 `OP_TEST` **30 轮 0 错误**（见 [板卡快照](../docs/PROJECT_STATUS_SNAPSHOT_20261011.md)）。关键绑定值：
+
+| 字段 | 实测值 |
+|---|---|
+| BDF | `0000:21:00.0`（桥 `20:00.0`） |
+| vendor:device | `1edb:abcd` |
+| driver | `Anlogic-pcie`（`anlogic_pci`，2020.8.21，poll_mode=1） |
+| BAR | BAR0(user) 1M@`0x21200000`；BAR1(config) 64K@`0x21300000` |
+| 节点 | `/dev/ANLOGIC-PCI0_{user,control,h2c_0,c2h_0}`（`root:kvdev 0660`） |
+| 数据路径 | AXI-ST；H2C/C2H 走 SGDMA 字符设备（`os.write`/`os.read`） |
+| 提交顺序 | 先写 H2C，再读 C2H 帧 |
+| 完成判定 | 无应用 status 字；靠完整 C2H 帧 + CRC/seq/layer/position 校验 |
+| 超时 | 每个请求一个有限 monotonic deadline；`read_exact` 用 `select` 强制 |
+
+绑定后仍**待测**：`ATTENTION(op=0)`（endpoint 未实现）、DMA 对齐/粒度上限、`TLAST/TKEEP` 相位。绑定通过**不代表** Attention/数值/质量 Gate 通过。
 
 ## 只读观察证据（2026-10-05，非绑定）
 
@@ -17,7 +35,7 @@
 | NPU/显示（参考） | `/dev/dri/{card0,card1,renderD128,renderD129}`、`/dev/mpp_service`；RKNPU 0.9.8 |
 | 结论 | 端点缺失根因是 **DTB 关闭控制器**；打通步骤见 `pcie_transport/PCIE_BRINGUP_RUNBOOK.md`（需协调窗口 + 串口 root + 重启） |
 
-**UNBOUND 原因（更新 2026-10-06）**：BDF/driver/节点/BAR/寄存器通路/RAW H2C 已有实测证据（见下），但 **C2H 双向、DMA 限制、v2 framed、endpoint opcode** 尚未取得，binding 仍不完整，故保持 UNBOUND。
+**UNBOUND 原因（更新 2026-10-06，已被 2026-10-11 的 BOUND 记录取代）**：以下“UNBOUND”判断只反映 2026-10-06 当时状态。2026-10-11 已取得 C2H 双向与 v2 framed `OP_TEST`（30 轮 0 错误）证据并填成 kind=real binding；仅 `ATTENTION`、DMA 限制细项仍待测。
 
 ## 枚举与能力观察证据（2026-10-06，PC2，实板）
 
