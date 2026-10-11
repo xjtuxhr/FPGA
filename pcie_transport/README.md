@@ -11,7 +11,11 @@ transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/�
 ## 文件
 
 - `binding.py`：binding 证据数据结构（对应 TRANSPORT_BINDING.md 表）与 UNBOUND 守卫
-- `sgdma_device.py`：真实 SGDMA 设备适配骨架（**未绑定**，枚举后按 binding 填；未实现即 fail closed）
+- `sgdma_device.py`：**真实 SGDMA 设备适配**（已实现）：`write`/`read_exact`(select+deadline)/
+  `notify`(no-op)/`wait_ready`/`flush_queues`，只用 binding 里的设备节点，**不写死 BAR**
+- `host_plugin.py`：**PC1 host 侧 transport plugin**（`pcie_transport.host_plugin:make_transport`），
+  提供 `exchange(request, timeout_s)`/`close()`/`metadata()`，对齐 PC1 `plugin_transport`
+- `tools/pcie1-fpga.sh`：加固版 PCIe1 bring-up（上电/PERST/rebind + **有限重试**），修冷启动时序
 - `transport.py`：单在途请求状态机（IDLE→H2C→WAIT→READBACK→CONSUMED / FAULT），
   仅实现 v2 README §7 的**逻辑状态**，不臆造硬件寄存器
 - `oracle_test.py`：OP_TEST 30 轮串行基准（每轮不同 counter、逐字节比对、
