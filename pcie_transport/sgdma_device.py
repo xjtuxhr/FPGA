@@ -5,29 +5,66 @@ Maps the transport ``DeviceOps`` to the vendor SGDMA character devices
 No BAR address, register offset or ioctl shape is hardcoded here; only the
 nodes described by the binding are used.
 
-Evidence-verified behavior (2026-10-11, v2 endpoint bit
-``imx415_pcie_4k.bit`` sha256 8FA867D7...BEF9; see
-``docs/PROJECT_STATUS_SNAPSHOT_20261011.md``):
+Deadlines (evidence-backed, see ``pcie_transport/H2C_WRITE_TIMEOUT.md``):
 
-- H2C: a single ``os.write`` of the logical frame (1952B ``OP_TEST`` /
-  32B ``RESET_CACHE``) submits the SGDMA transfer; frames are not fragmented
-  (short write is a hard error).
-- C2H: ``os.read`` from the c2h char device returns the logical frame
-  (1184B ``OP_TEST`` / 32B reset ack). Reads are non-blocking and bounded by
-  one monotonic deadline via ``select``.
-- ``notify``: the char-device write is the submission; there is no separate
-  doorbell on this binding, so it is a documented no-op (never a fake ACK).
-- ``wait_ready``: no application status word is wired yet (PCIE003 spec TODO);
-  completion is proven by a complete, contract-validated C2H frame read under
-  the deadline, so this returns True without polling a non-existent bit.
+- The vendor driver submits each frame as a descriptor and waits with
+  ``al_wait_event_interruptible_timeout`` bounded by the ``h2c_timeout`` /
+  ``c2h_timeout`` module parameters (default 10 s; confirmed live via
+  ``/sys/module/anlogic_pci/parameters/h2c_timeout``). The wait is
+  *interruptible*: a signal aborts it early, and the driver then aborts the
+  transfer, stops the engine and returns ``-ERESTARTSYS``.
+- C2H reads are bounded by ``select`` on a non-blocking fd.
+- H2C ``os.write`` is bounded by the same interruptible wait: a per-request
+  ``SIGALRM`` (main thread only) raises at the deadline and aborts the kernel
+  wait, so the call never exceeds our deadline. NOTE: a timed-out H2C write
+  leaves the SGDMA engine stopped, so the endpoint MUST be reset before reuse
+  (this is an abort-and-recover, not a clean cancel).
+- ``notify`` is a documented no-op (the char-device write is the submission);
+  ``wait_ready`` returns without inventing a status bit (no application status
+  register is wired yet -- see PCIE003_INTERFACE_SPEC.md TODO).
 """
+import contextlib
 import errno
 import os
 import select
+import signal
+import threading
 import time
 
 from pcie_transport.binding import Binding, BindingError
 from pcie_transport.transport import TransportError
+
+
+class _Deadline(Exception):
+    """Internal: raised from the SIGALRM handler to abort an interruptible wait."""
+
+
+@contextlib.contextmanager
+def _interruptible_deadline(deadline: float):
+    """Arm a SIGALRM that aborts a blocking syscall at ``deadline``.
+
+    Valid only in the main thread. Yields True if armed, False if the
+    mechanism is unavailable (then the driver's own ``h2c_timeout`` bound is
+    the only ceiling and the caller must detect late returns).
+    """
+    if deadline - time.monotonic() <= 0:
+        raise TransportError("deadline already expired before blocking call")
+    if (threading.current_thread() is not threading.main_thread()
+            or not hasattr(signal, "SIGALRM") or not hasattr(signal, "setitimer")):
+        yield False
+        return
+    remaining = deadline - time.monotonic()
+
+    def _handler(signum, frame):
+        raise _Deadline()
+
+    previous = signal.signal(signal.SIGALRM, _handler)
+    signal.setitimer(signal.ITIMER_REAL, remaining)
+    try:
+        yield True
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous)
 
 
 class SgdmaDevice:
@@ -46,6 +83,16 @@ class SgdmaDevice:
         self._h2c_fd = None
         self._c2h_fd = None
 
+    @property
+    def deadline_enforced(self) -> bool:
+        """True when blocking H2C writes are abortable at the deadline.
+
+        Requires the main thread (SIGALRM) and the vendor driver's interruptible
+        wait; otherwise only the driver ``h2c_timeout`` ceiling applies.
+        """
+        return (threading.current_thread() is threading.main_thread()
+                and hasattr(signal, "SIGALRM") and hasattr(signal, "setitimer"))
+
     def _open_h2c(self) -> int:
         if self._h2c_fd is None:
             self._h2c_fd = os.open(self.binding.h2c_node, os.O_WRONLY)
@@ -59,10 +106,18 @@ class SgdmaDevice:
     def write(self, frame: bytes, *, deadline: float) -> int:
         if not isinstance(frame, bytes) or not frame:
             raise TransportError("H2C frame must be non-empty bytes")
-        try:
-            return os.write(self._open_h2c(), frame)
-        except OSError as exc:
-            raise TransportError(f"H2C write failed: {exc}") from exc
+        fd = self._open_h2c()
+        with _interruptible_deadline(deadline):
+            try:
+                return os.write(fd, frame)
+            except _Deadline as exc:
+                raise TransportError(
+                    "H2C write aborted at deadline; driver stopped the SGDMA engine, "
+                    "endpoint requires reset before reuse") from exc
+            except InterruptedError as exc:
+                raise TransportError(f"H2C write interrupted (EINTR): {exc}") from exc
+            except OSError as exc:
+                raise TransportError(f"H2C write failed: {exc}") from exc
 
     def read_exact(self, count: int, *, deadline: float) -> bytes:
         if type(count) is not int or count <= 0:

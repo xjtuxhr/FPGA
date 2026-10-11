@@ -40,9 +40,14 @@ class BoardTransport:
             "max_inflight": 1,
             "hardware_transport": True,
             "binding_verified": bool(self.binding.is_bound),
+            # Capability flags report VERIFIED capability only:
+            # - attention/KV-write/policy control plane are NOT implemented yet,
+            # - deadline_enforced depends on the interruptible H2C write mechanism.
             "attention_supported": self._attention_supported,
-            "policy_configured": False,   # B/U/M policy control plane not implemented yet
-            "deadline_enforced": True,
+            "policy_configured": False,
+            "deadline_enforced": bool(getattr(self.device, "deadline_enforced", False)),
+            "supported_ops": ["reset_cache", "test"],
+            "kv_write_supported": False,
         }
 
     def exchange(self, request: bytes, *, timeout_s: float) -> bytes:
