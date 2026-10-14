@@ -1,6 +1,11 @@
 # H2C 阻塞写的超时问题：驱动核查与有界方案
 
-状态：**已核查 + 已实现机制（本地验证）；实板验证待独占窗口**。日期：2026-10-11。作者：PC2。
+状态：**已核查 + 已实现机制（本地验证）；实板验证已做（2026-04-27）——结果 NEGATIVE：deadline 未生效。**
+日期：2026-10-11（板测更新 2026-04-27）。作者：PC2。
+
+> 板测结论：阻塞的 H2C 写在我们的 0.5 s deadline **没有**被中断，返回于驱动 `h2c_timeout`=10 s。
+> 即 SIGALRM 没有收紧上界（`_Deadline` 直到内核调用返回才触发）。因此 `deadline_enforced` 保持 **False**。
+> 详见 [BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md](BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md)。
 
 ## 1. 问题
 
@@ -51,7 +56,11 @@ else
 
 本地验证：`pcie_transport/tests/test_sgdma_deadline.py`（用匿名管道模拟阻塞 fd，验证在 deadline 处中断、deadline 过期即报错、非主线程不武装）。
 
-## 5. 实板验证计划（需**另行批准的独占窗口**，不得擅自重启/改系统）
+## 5. 实板验证（2026-04-27 已执行）——结果 NEGATIVE
+
+板测发现：正常回归通过；用未实现的 `ATTENTION` 帧确实能造出阻塞写；但该写**没有**在我们的 0.5 s deadline
+被中断，而是返回于驱动 `h2c_timeout`=10 s（dmesg 见驱动自身 `xfer … timed out`）。超时后需完整恢复。
+→ 机制**未生效**，`deadline_enforced` 必须保持 False。原计划步骤保留如下供追溯。
 
 1. 制造一个**不会被消费的 H2C 帧**（例如 endpoint 不接收该请求 / 临时停消费），对 `h2c_0` 发一帧，
    传入小 deadline（如 0.5 s）；断言 `os.write` 在 **≈deadline** 返回并抛错，**而非 10 s**。

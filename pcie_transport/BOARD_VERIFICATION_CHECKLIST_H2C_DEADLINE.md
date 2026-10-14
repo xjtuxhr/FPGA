@@ -1,7 +1,32 @@
 # 实板验证清单：H2C 有界写（申请独占窗口时使用）
 
-状态：**未执行**；需操作者批准的独占板卡窗口。作者：PC2。目标：证明 H2C `os.write` 能在**我们的 deadline** 被中断
-（而非等到驱动 `h2c_timeout`=10s），且超时后需 RESET 恢复。**不改驱动/系统。**
+状态：**已执行（2026-04-27）——结果 NEGATIVE：deadline 未生效。** 作者：PC2。
+目标：证明 H2C `os.write` 能在**我们的 deadline** 被中断（而非等到驱动 `h2c_timeout`=10s），且超时后需 RESET 恢复。**不改驱动/系统。**
+
+## 0. 结果（2026-04-27 板测）
+
+| 步骤 | 结果 |
+|---|---|
+| 正常路径回归（Transport，30 轮 OP_TEST） | ✅ OK=30 bad=0，p50≈0.33 ms；`deadline_enforced` 属性此时返回 True |
+| 制造阻塞（发 1 个未实现的 `ATTENTION` 帧 → 端点停止消费） | ✅ 下一帧 H2C 写确实阻塞 |
+| 断言：小 deadline 被中断 | ❌ **未通过**：写返回于 **10.000 s**（= 驱动 `h2c_timeout`），**不是** 0.5 s；dmesg 见驱动自身 `xfer … timed out` |
+| 断言：超时后需 RESET | ✅ 之后普通 `reset_cache` 立即 FAULT，需完整恢复（rmmod+unbind+PERST+insmod）后才能再用 |
+| 恢复后 | ✅ 30 轮 OP_TEST 再次 OK=30 bad=0 |
+
+**结论**：SIGALRM 机制在本板**没有**把写收紧到我们的 deadline；`_Deadline` 直到内核调用在驱动超时后返回才触发。
+因此 `metadata().deadline_enforced` 必须保持 **False**（已修：`SgdmaDevice.deadline_enforced` 现在要求
+`deadline_verified=True` 显式确认，默认 False）。**不用"外层 Python timeout"冒充已解决。**
+
+复现命令（独占窗口，允许写端点状态；结束须完整恢复）：
+
+```bash
+DEST=/home/kvdev/work_pc2_pcie/h2cdeadline_20260427_211835
+python3 "$DEST/h2c_test.py" "$DEST" regress    # 30 轮回归（先做）
+python3 "$DEST/h2c_test.py" "$DEST" block      # poison ATTENTION + 0.5s deadline 断言
+# 恢复：systemctl stop anlogic-sgdma; rmmod anlogic_pci; unbind; /usr/local/sbin/pcie1-fpga.sh; insmod
+```
+
+---
 
 ## 0. 前置
 
