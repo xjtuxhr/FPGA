@@ -14,11 +14,14 @@ Deadlines (evidence-backed, see ``pcie_transport/H2C_WRITE_TIMEOUT.md``):
   *interruptible*: a signal aborts it early, and the driver then aborts the
   transfer, stops the engine and returns ``-ERESTARTSYS``.
 - C2H reads are bounded by ``select`` on a non-blocking fd.
-- H2C ``os.write`` is bounded by the same interruptible wait: a per-request
-  ``SIGALRM`` (main thread only) raises at the deadline and aborts the kernel
-  wait, so the call never exceeds our deadline. NOTE: a timed-out H2C write
-  leaves the SGDMA engine stopped, so the endpoint MUST be reset before reuse
-  (this is an abort-and-recover, not a clean cancel).
+- H2C ``os.write`` is intended to be bounded by the same interruptible wait:
+  a per-request ``SIGALRM`` (main thread only) raises at the deadline. NOTE:
+  a timed-out H2C write leaves the SGDMA engine stopped, so the endpoint MUST
+  be reset before reuse (abort-and-recover, not a clean cancel).
+  BOARD RESULT 2026-04-27: the SIGALRM did NOT abort the write early -- it
+  returned at the driver ``h2c_timeout`` (10 s), not our deadline. So
+  ``deadline_enforced`` is False unless explicitly verified; see
+  ``H2C_WRITE_TIMEOUT.md`` and ``BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md``.
 - ``notify`` is a documented no-op (the char-device write is the submission);
   ``wait_ready`` returns without inventing a status bit (no application status
   register is wired yet -- see PCIE003_INTERFACE_SPEC.md TODO).
@@ -68,12 +71,13 @@ def _interruptible_deadline(deadline: float):
 
 
 class SgdmaDevice:
-    def __init__(self, binding: Binding):
+    def __init__(self, binding: Binding, *, deadline_verified: bool = False):
         if not isinstance(binding, Binding) or not binding.is_bound:
             raise BindingError("SgdmaDevice requires a complete binding")
         binding.validate()
         if binding.kind != "real":
             raise BindingError("SgdmaDevice is for kind=real bindings only")
+        self._deadline_verified = bool(deadline_verified)
         for name, path in (("h2c", binding.h2c_node), ("c2h", binding.c2h_node)):
             if not path.startswith("/dev/"):
                 raise BindingError(f"{name} node must be an absolute /dev path, got {path!r}")
@@ -85,12 +89,17 @@ class SgdmaDevice:
 
     @property
     def deadline_enforced(self) -> bool:
-        """True when blocking H2C writes are abortable at the deadline.
+        """True only when the interruptible-deadline mechanism is BOTH available
+        AND verified to work on this board.
 
-        Requires the main thread (SIGALRM) and the vendor driver's interruptible
-        wait; otherwise only the driver ``h2c_timeout`` ceiling applies.
+        2026-04-27 board result (BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md):
+        a blocking H2C write was NOT aborted at our 0.5 s deadline -- it returned
+        at the driver ``h2c_timeout`` (10 s). So the SIGALRM ceiling did NOT take
+        effect and this stays False. An operator may pass ``deadline_verified=True``
+        only after a GREEN board run; do not infer it from thread/POSIX alone.
         """
-        return (threading.current_thread() is threading.main_thread()
+        return (self._deadline_verified
+                and threading.current_thread() is threading.main_thread()
                 and hasattr(signal, "SIGALRM") and hasattr(signal, "setitimer"))
 
     def _open_h2c(self) -> int:
@@ -172,5 +181,5 @@ class SgdmaDevice:
                 setattr(self, name, None)
 
 
-def make_device(binding: Binding) -> SgdmaDevice:
-    return SgdmaDevice(binding)
+def make_device(binding: Binding, *, deadline_verified: bool = False) -> SgdmaDevice:
+    return SgdmaDevice(binding, deadline_verified=deadline_verified)

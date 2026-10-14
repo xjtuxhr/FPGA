@@ -58,7 +58,7 @@ def summarize(records):
     out = {
         "rounds": len(records),
         "errors": 0,
-        "profile": "framed_v2 (1952B/1184B logical frames; mock has no DMA padding)",
+        "profile": "framed_v2 (1952B/1184B logical frames)",
         "min_s": min(totals), "mean_s": statistics.mean(totals),
         "max_s": max(totals),
         "p95_s": sorted(totals)[max(0, int(len(totals) * 0.95) - 1)],
