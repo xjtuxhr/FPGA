@@ -1,4 +1,4 @@
-# PC2 板测记录：冷启动修复 + endpoint RESET 异常【已修复并通过 30 轮】（2026-04-27）
+# PC2 板测记录：冷启动修复 + endpoint RESET 异常【已修复并通过 30 轮】（2026-10-14）
 
 状态：**RESOLVED** — 冷启动已修复并重启验证；endpoint RESET/OP_TEST 在 B 的新 bit 上复测通过（30 轮 0 错误）。作者：PC2。开放问题仍以 [UNKNOWNS](../docs/UNKNOWNS.md) 为准，本文件不复制独立清单。
 

@@ -26,7 +26,7 @@
 ## 1. 硬前提
 
 1. **协调**：另一操作者明确回复“板卡空闲”，并同意重启窗口（重启会断掉所有 SSH、清掉 NPU 状态）。
-2. **root 通道**：`kvdev` 无 sudo、root 密码锁定，只能用**串口 root shell**（`ttyFIQ0`）执行写盘。
+2. **root 通道**：`kvdev` **不在 sudoers**；`linaro` 账户在 `sudo` 组，可用 `sudo`（2026-10-14 更新）；串口 root shell（`ttyFIQ0`）亦可用。写盘操作仍须按本手册先批准。
 3. **重启后网络**：`end0` 的 `192.168.137.101/24` 是临时的（UNKNOWN LNX-002），重启后要用串口补设。
 4. **回滚准备**：补丁工具会先备份到 `/userdata`；记下备份文件名。
 
@@ -81,6 +81,21 @@ bash /home/kvdev/work_pc2_pcie/probe_enumeration.sh /home/kvdev/work_pc2_pcie/ev
 3. **SGDMA 驱动未加载**：厂商 `deploy/sgdma_drv` 需编译/加载后才有 `/dev/ANLOGIC*`、`/dev/sgdma*`。
 
 以上任一都需 FPGA 老师 / 现场配合，属系统变更，不在"仅改 DTB"范围。
+
+## 3b. （2026-10-14）链路已通后的恢复操作
+
+- PCIe1 已在 2026-10-06 打通（FIT DTB 补丁 + `pcie1-fpga`/`anlogic-sgdma` 服务），本机不再需要 `disabled→okay` 的写盘。
+- **JTAG/重配 FPGA 后链路会「假 up」**：`lspci` 仍显示 `1edb:abcd`，但端点是旧的、H2C 写会 `errno 512`。必须**完整恢复**：
+
+  ```sh
+  systemctl stop anlogic-sgdma; rmmod anlogic_pci
+  echo 2a210000.pcie > /sys/bus/platform/drivers/rk-pcie/unbind; sleep 2
+  /usr/local/sbin/pcie1-fpga.sh
+  systemctl start anlogic-sgdma
+  ```
+
+- 冷启动已加固（`pcie1-fpga.sh` 长重试 + service `Restart=on-failure`），软重启实测自动 up。
+- 细节与证据见 [RESET_ACK_REGRESSION_20261014.md](RESET_ACK_REGRESSION_20261014.md)。
 
 ## 4. 回滚（串口 root）
 

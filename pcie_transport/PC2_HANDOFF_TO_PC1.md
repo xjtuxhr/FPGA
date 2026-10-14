@@ -3,11 +3,14 @@
 范围：把 PC2 的 `pcie_transport` 交给 PC1 接入；含 **F1 一行改动**（PC1 侧桥接）。
 依据：本仓库 `main`。**不代表任何板卡 Gate 通过。**
 
-> 2026-04-27 更新：B 修 endpoint RESET 后，新 bit（`imx415_pcie_4k.bit`
+> 2026-10-14 更新：B 修 endpoint RESET 后，新 bit（`imx415_pcie_4k.bit`
 > SHA256 `165E2B97…3C9F840F`）上 `RESET` 单发 32B ACK、`OP_TEST` 30 轮 0 错误已复现
-> （见 [RESET_ACK_REGRESSION_20260427.md](RESET_ACK_REGRESSION_20260427.md)）。
+> （见 [RESET_ACK_REGRESSION_20261014.md](RESET_ACK_REGRESSION_20261014.md)）。
 > transport 可继续接入；`ATTENTION(op=0)` 仍未实现（`metadata` 继续 `false`）。
 > 注意：**JTAG 重配后链路会「假 up」，PC1 复测前需先做完整恢复**（rmmod+unbind+PERST+insmod）。
+> **H2C 有界写验证 NEGATIVE**：`deadline_enforced` 必须保持 **false**；H2C 写最坏按驱动 `h2c_timeout`≈10s；
+> 写超时/中断后停止请求、不自动重试/发下一层，完整恢复走获批窗口。
+> 见 [BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md](BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md)。
 
 ## 1. PC1 需要拉的文件
 

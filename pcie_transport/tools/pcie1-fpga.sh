@@ -7,7 +7,7 @@
 # Hardened 2026-10-11: the boot-time ordering race (rk-pcie trained before the
 # FPGA/supply/PERST were ready) previously left lspci empty with no retry.
 #
-# Hardened 2026-04-27 (PC2): a 5-attempt / 34 s boot window was still too short
+# Hardened 2026-10-14 (PC2): a 5-attempt / 34 s boot window was still too short
 # on cold boot -- the boot service logged retry 1/5..5/5 then gave up, while a
 # manual unbind+run minutes later came up on the first try. This version:
 #   * waits for the gpio/regulator subsystems, then an initial settle delay;

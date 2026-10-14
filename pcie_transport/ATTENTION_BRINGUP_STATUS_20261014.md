@@ -1,4 +1,4 @@
-# PC2 单层 ATTENTION 上板路线：步骤 1 通过、步骤 2 受阻（2026-04-27）
+# PC2 单层 ATTENTION 上板路线：步骤 1 通过、步骤 2 受阻（2026-10-14）
 
 状态：**步骤 1 ✅ 通过；步骤 2/3 ⛔ 受阻于 B 的 endpoint**。作者：PC2。
 开放问题仍以 [UNKNOWNS](../docs/UNKNOWNS.md) 为准。板钟异常，时间戳不作证据。
@@ -24,8 +24,9 @@
   ```
 
 - 结果：`errors=0`，reset `0.839 ms`，round p95 `0.516 ms`、mean `0.359 ms`、min `0.232 ms`、total `10.78 ms`。
+- 100 轮复测：`errors=0`，mean `0.395 ms`、p95 `0.571 ms`、max `3.35 ms`、total `39.5 ms`。
 - 证据：`$DEST/host/results/op_test_<ts>/{op_test_summary.json,op_test_rounds.csv}`。
-- 另：单发 RESET 恰好 1 个 32B ACK、seq 回显、无多余输出（见 RESET_ACK_REGRESSION_20260427.md）。
+- 另：单发 RESET 恰好 1 个 32B ACK、seq 回显、无多余输出（见 RESET_ACK_REGRESSION_20261014.md）。
 
 **结论**：传输层（RESET/OP_TEST，framed v2）在新 bit 上稳定通过。⚠️ `deadline_enforced` 仍为 **false**
 （H2C 写最坏上界=驱动 10 s；见 BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md）。
@@ -37,7 +38,7 @@
 1. `ATTENTION(op=0)` 未实现 → 没有「H2C QKV → 写 KV 进 DDR → 读历史 → 出输出」的数据通路（`PCIE003_FPGA_REPLY3`、快照 2026-10-11）。
 2. **应用 status 字未接**（`pcie_status.v` 未实例化）→ 无法从 control 读 `[0]DONE/[3:1]ERR`，也就没有 DDR-ready / KV 状态可观测。
 3. BAR0 寄存器实测是**摄像头例程的地图**：`0x5C=0x56440013`（例程版本号，非 endpoint 版本），其余多为 SGDMA/视频相关；没有文档化的 DDR-ready 或 KV 计数器位。
-   （2026-04-27 dump：`0x40=2 0x44=0xf00 0x48=0x870 0x4c=1 0x58/0x64=0x017bb000 0x74=0xc05 0x78=0x17bb00 0x80=1 0x84=0x2001 0x8c=0xf000870 0x90=1 0x98=0x64`；其余 0。）
+   （2026-10-14 dump：`0x40=2 0x44=0xf00 0x48=0x870 0x4c=1 0x58/0x64=0x017bb000 0x74=0xc05 0x78=0x17bb00 0x80=1 0x84=0x2001 0x8c=0xf000870 0x90=1 0x98=0x64`；其余 0。）
 
 **需要 B 提供（才能让 PC2 检查 DDR/KV）**：
 - 实现 `ATTENTION(op=0)` 数据通路（含 DDR 写 KV / 读历史）。

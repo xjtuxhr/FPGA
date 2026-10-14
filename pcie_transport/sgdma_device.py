@@ -18,7 +18,7 @@ Deadlines (evidence-backed, see ``pcie_transport/H2C_WRITE_TIMEOUT.md``):
   a per-request ``SIGALRM`` (main thread only) raises at the deadline. NOTE:
   a timed-out H2C write leaves the SGDMA engine stopped, so the endpoint MUST
   be reset before reuse (abort-and-recover, not a clean cancel).
-  BOARD RESULT 2026-04-27: the SIGALRM did NOT abort the write early -- it
+  BOARD RESULT 2026-10-14: the SIGALRM did NOT abort the write early -- it
   returned at the driver ``h2c_timeout`` (10 s), not our deadline. So
   ``deadline_enforced`` is False unless explicitly verified; see
   ``H2C_WRITE_TIMEOUT.md`` and ``BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md``.
@@ -92,7 +92,7 @@ class SgdmaDevice:
         """True only when the interruptible-deadline mechanism is BOTH available
         AND verified to work on this board.
 
-        2026-04-27 board result (BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md):
+        2026-10-14 board result (BOARD_VERIFICATION_CHECKLIST_H2C_DEADLINE.md):
         a blocking H2C write was NOT aborted at our 0.5 s deadline -- it returned
         at the driver ``h2c_timeout`` (10 s). So the SIGALRM ceiling did NOT take
         effect and this stays False. An operator may pass ``deadline_verified=True``
