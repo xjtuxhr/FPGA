@@ -4,6 +4,11 @@
 已在 v2 endpoint 上跑通 framed v2 `OP_TEST` 30 轮 0 错误；binding 证据见
 [`bindings/board_20261011.json`](bindings/board_20261011.json)。`ATTENTION(op=0)` 仍未实现。
 
+2026-04-27 复测：旧 endpoint bit 出现 RESET 洪泛（seq=magic），B 修 RTL 后新 bit 上
+`RESET` 单发 32B ACK、`OP_TEST` 30 轮 0 错误复现。注意 **JTAG 重配后链路「假 up」，
+必须完整恢复（rmmod+unbind+PERST+insmod）才生效**。详见
+[`RESET_ACK_REGRESSION_20260427.md`](RESET_ACK_REGRESSION_20260427.md)。
+
 协作边界见 [COOPERATION.md](../pcie_contract/COOPERATION.md)：PC2 负责 PCIe
 transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/数值格式或
 系统 runtime。协议常量一律引用 `pcie_contract/contract.py`，本目录不重复定义。
@@ -15,12 +20,16 @@ transport/SGDMA 复用/测试 endpoint；不修改 host tensor 语义、模型/�
   `notify`(no-op)/`wait_ready`/`flush_queues`，只用 binding 里的设备节点，**不写死 BAR**
 - `host_plugin.py`：**PC1 host 侧 transport plugin**（`pcie_transport.host_plugin:make_transport`），
   提供 `exchange(request, timeout_s)`/`close()`/`metadata()`，对齐 PC1 `plugin_transport`
-- `tools/pcie1-fpga.sh`：加固版 PCIe1 bring-up（上电/PERST/rebind + **有限重试**），修冷启动时序
+- `tools/pcie1-fpga.sh`：加固版 PCIe1 bring-up（上电/PERST/rebind）。2026-04-27 进一步加固：
+  先等 gpio/regulator 子系统 + settle，重试窗口扩到 ~3 min，失败 `exit 1`；配套 service
+  `Restart=on-failure`。冷启动已软重启验证自动 up（~18.8 s）
 - `transport.py`：单在途请求状态机（IDLE→H2C→WAIT→READBACK→CONSUMED / FAULT），
   仅实现 v2 README §7 的**逻辑状态**，不臆造硬件寄存器
 - `oracle_test.py`：OP_TEST 30 轮串行基准（每轮不同 counter、逐字节比对、
   min/mean/max/p95），区分 raw/framed profile 标记
 - `tools/run_op_test_on_board.py`：**板端** framed v2 30 轮 runner（需完整 real binding + 设备模块，fail closed）
+- `attention_vectors.py`：单层 ATTENTION 的 Q/K/V 打包与 golden 对拍助手（标准库，无设备访问；对应 `ATTENTION(op=0)` 1920B/1152B）
+- `tools/run_attention_on_board.py`：**板端**单层 ATTENTION runner（RESET + N 个 ATTENTION 帧；`Transport` 校验 framing，可选 `--golden` 对拍输出；fail closed，等 B 的 `ATTENTION(op=0)`）
 - `tools/fit_dtb_patch.py`：**FIT 感知**的 DTB 补丁（p3 是 FIT 容器，真正的 DTB 在 `/images/fdt`）；分析/提取/打补丁/更新 hash，拒绝签名镜像。PC 已验证
 - `tools/probe_enumeration.sh`：板上**只读**枚举取证脚本（改前/改后各跑一次；
   只读契约由 `tests/test_probe_tool.py` 守卫）
@@ -43,6 +52,7 @@ python -B -m unittest pcie_transport.tests.test_patch_tool -v
 python -B -m unittest pcie_transport.tests.test_probe_tool -v
 python -B -m unittest pcie_transport.tests.test_op_test_runner -v
 python -B -m unittest pcie_transport.tests.test_fit_dtb_patch -v
+python -B -m unittest pcie_transport.tests.test_attention_runner -v
 python -B -m pcie_transport.oracle_test --rounds 30 --mock
 ```
 
@@ -50,6 +60,9 @@ python -B -m pcie_transport.oracle_test --rounds 30 --mock
 
 ```bash
 python3 -B -m pcie_transport.tools.run_op_test_on_board --binding <binding.json> --rounds 30 --out host/results/op_test
+# single-layer ATTENTION (needs endpoint ATTENTION(op=0); optional --golden for output compare)
+python3 -B -m pcie_transport.tools.run_attention_on_board --binding <binding.json> \
+    --layer 0 --start-position 0 --rounds 1 --out host/results/attention
 ```
 
 mock 结果只验证状态机与校验逻辑正确，**不是 Gate 证据**。
