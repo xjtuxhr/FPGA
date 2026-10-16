@@ -28,6 +28,7 @@ RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整
 7. [预算说明](docs/BUDGET_GUIDE.md)、[模型与PC证据](docs/MODEL_AND_PC_RESULTS.md)、[硬件事实](docs/HARDWARE_FACTS.md)。
 8. [REVIEW](docs/REVIEW.md)：历史判断修正；[原始资料索引](references/README.md)。
 9. [Hummingbird+ 论文启发与实施建议（2026-10-16）](docs/HUMMINGBIRD_PLUS_PROJECT_INSIGHTS_20261016.md)：GQA 复用、DDR 分块、softmax 和 KVmix 融合的候选优化及对照实验；区分论文报告、本地构建证据与待实测结果。
+10. [Attention + DDR 单层对拍交接（更新 2026-10-16）](docs/ATTENTION_DDR_BOARD_HANDOFF_20261014.md)：功能 bit/操作包 SHA256、COM4 实测 DDR 就绪结果、PC2 的 RESET + 30 TEST + 8 ATTENTION 命令及回传条件；实板 Attention 对拍尚待执行，操作包由 B 另行交付。
 
 ```powershell
 python tools/budget_check.py --model smol135m
