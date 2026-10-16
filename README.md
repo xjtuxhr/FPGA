@@ -27,6 +27,7 @@ RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整
 6. [RK3576 Linux / NPU / PCIe 开发入口](docs/RK3576_LINUX_DEVELOPMENT.md)：随板教程证据、版本矩阵与操作 SOP；教程称出厂默认 Buildroot，**本项目实板已运行 Debian 12**。
 7. [预算说明](docs/BUDGET_GUIDE.md)、[模型与PC证据](docs/MODEL_AND_PC_RESULTS.md)、[硬件事实](docs/HARDWARE_FACTS.md)。
 8. [REVIEW](docs/REVIEW.md)：历史判断修正；[原始资料索引](references/README.md)。
+9. [Hummingbird+ 论文启发与实施建议（2026-10-16）](docs/HUMMINGBIRD_PLUS_PROJECT_INSIGHTS_20261016.md)：GQA 复用、DDR 分块、softmax 和 KVmix 融合的候选优化及对照实验；区分论文报告、本地构建证据与待实测结果。
 
 ```powershell
 python tools/budget_check.py --model smol135m
