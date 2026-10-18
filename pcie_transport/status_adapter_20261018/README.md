@@ -78,8 +78,25 @@ python3 -B -c "import status_adapter as s; print(hex(s.probe_bar0(0x5c)))"
 
 Expected on the current bit: `0x56440013` (path check only).
 
+## Session integration
+
+- `status_session.py`: builds `SgdmaDevice -> StatusTransport -> AbortableDevice
+  -> Transport`, runs RESET + N x OP_TEST, and refuses to start until
+  `status_offset`/`control_offset` are provided by B.
+- `status_config.example.json`: candidate config with `null` offsets (refused
+  until B confirms).
+- `test_status_session.py`: 5 offline session tests (normal 2 rounds, not-ready
+  fast reject, fault fail-stop, config offset refusal).
+- `NEGATIVE_TESTS.md`: N1-N10 board negative-test plan and acceptance criteria.
+
+Offline suite: 14 adapter tests + 5 session tests = 19 tests.
+
 ## Files
 
 - `status_adapter.py`
+- `status_session.py`
 - `test_status_adapter.py`
+- `test_status_session.py`
+- `NEGATIVE_TESTS.md`
+- `status_config.example.json`
 - `README.md`

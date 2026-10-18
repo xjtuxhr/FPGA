@@ -256,6 +256,9 @@ class AbortableDevice:
             raise result["err"]
         return result["n"]
 
+    def wait_ready(self, seq: int, *, deadline: float) -> bool:
+        return self.inner.wait_ready(seq, deadline=deadline)
+
     def read_exact(self, count: int, *, deadline: float) -> bytes:
         return self.inner.read_exact(count, deadline=deadline)
 

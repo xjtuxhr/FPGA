@@ -1,0 +1,11 @@
+{
+  "bar_id": 0,
+  "status_offset": null,
+  "control_offset": null,
+  "node": "/dev/ANLOGIC-PCI0_user",
+  "use_ioctl": false,
+  "abort_node": "/dev/ANLOGIC-PCI0_h2c_0",
+  "ready_timeout_s": 1.0,
+  "request_timeout_s": 5.0,
+  "abort_grace_s": 5.0
+}
