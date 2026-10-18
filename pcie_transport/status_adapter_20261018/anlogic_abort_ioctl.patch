@@ -1,0 +1,107 @@
+--- a/cdev_ctrl.h
++++ b/cdev_ctrl.h
+@@ -144,6 +144,8 @@
+ #define ANLOGIC_IOCCFGR            _IOR(ANLOGIC_IOC_MAGIC,9, unsigned int)
+ 
+ #define ANLOGIC_IOCRTEST        _IOW(ANLOGIC_IOC_MAGIC, 10, struct anlogic_ioc_rtest)
++/* PC2: abort the current in-flight SGDMA transfer on the opened engine node. */
++#define ANLOGIC_IOCABORT        _IO(ANLOGIC_IOC_MAGIC, 11)
+ 
+ 
+ 
+
+--- a/cdev_sgdma.c
++++ b/cdev_sgdma.c
+@@ -27,6 +27,7 @@
+ #include <linux/wait.h>
+ #include <linux/kthread.h>
+ #include <linux/version.h>
++#include <linux/moduleparam.h>
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0)
+ #include <linux/uio.h>
+ #endif
+@@ -35,8 +36,22 @@
+ #include "anlogic_thread.h"
+ #include "anlogic_ring.h"
+ #include "cdev_sgdma.h"
++#include "cdev_ctrl.h"
+ 
+ #define AL_USE_RING_READ 0
++
++/*
++ * PC2 bring-up workaround: after a host process closes the h2c/c2h char
++ * devices, the engine can remain marked running even though the hardware
++ * descriptor chain has stopped. The next process then queues a transfer
++ * without restarting the engine and blocks until h2c_timeout. Stopping the
++ * engine on close clears ->running so the next transfer_queue() starts it.
++ * This assumes single-user access (the project's current host model).
++ */
++static bool reset_on_close = true;
++module_param(reset_on_close, bool, 0644);
++MODULE_PARM_DESC(reset_on_close,
++    "Stop/reset the SGDMA engine when a char device is closed (default 1)");
+ 
+ extern struct kmem_cache *cdev_cache;
+ 
+@@ -685,6 +700,32 @@
+     case IOCTL_SGDMA_CUS_RW:
+ 	rv = ioctl_do_cus_dma(engine, arg);
+ 	break;
++    case ANLOGIC_IOCABORT: {
++        struct sgdma_transfer *xfer;
++        unsigned long flags;
++
++        spin_lock_irqsave(&engine->lock, flags);
++        if (list_empty(&engine->transfer_list)) {
++            rv = -ENOENT;
++        } else {
++            xfer = list_first_entry(&engine->transfer_list,
++                                    struct sgdma_transfer, entry);
++            pr_info("abort requested on %s xfer %p state %d\n",
++                    engine->name, xfer, xfer->state);
++            if (xfer->state == TRANSFER_STATE_SUBMITTED) {
++                xfer->state = TRANSFER_STATE_ABORTED;
++                list_del_init(&xfer->entry);
++                wake_up_interruptible(&xfer->wq);
++                rv = 0;
++            } else {
++                rv = -EALREADY;
++            }
++        }
++        spin_unlock_irqrestore(&engine->lock, flags);
++        if (rv == 0)
++            sgdma_engine_stop(engine);
++        break;
++    }
+     default:
+         dbg_perf("Unsupported operation\n");
+         rv = -EINVAL;
+@@ -729,6 +770,14 @@
+ 
+     if (engine->streaming && engine->dir == DMA_FROM_DEVICE)
+         engine->device_open = 0;
++
++    if (engine && reset_on_close) {
++        unsigned long flags;
++
++        spin_lock_irqsave(&engine->lock, flags);
++        sgdma_engine_stop(engine);
++        spin_unlock_irqrestore(&engine->lock, flags);
++    }
+ 
+     return 0;
+ }
+
+--- a/anlogic_pci_lib.c
++++ b/anlogic_pci_lib.c
+@@ -3057,6 +3057,10 @@
+ 			sgt_dump(sgt);
+ #endif
+ 			rv = -EIO;
++			break;
++		case TRANSFER_STATE_ABORTED:
++			spin_unlock_irqrestore(&engine->lock, flags);
++			rv = -ECANCELED;
+ 			break;
+ 		default:
+ 			/* transfer can still be in-flight */
