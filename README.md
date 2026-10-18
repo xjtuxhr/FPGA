@@ -1,6 +1,6 @@
 # KVmix_on_FPGA
 
-更新：2026-10-18。**正式模型：HuggingFaceTB/SmolLM-135M；正式架构：方案 C。** B 模式 Attention + DDR 已完成真实模型 CPU/HF 单层对拍、30 层不同 K/V 隔离及非空缓存 RESET 实板验证。PC1 新交付的 RK/NPU v40 Q/K/V 已通过离线复核；下一步解决 H2C deadline / 故障恢复门槛，再对拍本批输入的实际 FPGA 回包。完整异构模型与 U/M 尚未验收。详见[当前进度与团队分工](docs/TEAM_PROGRESS_AND_NEXT_STEPS_20261018.md)和[v40 输入审查](docs/NPU_V40_CAPTURE_REVIEW_20261018.md)。
+更新：2026-10-18。**正式模型：HuggingFaceTB/SmolLM-135M；正式架构：方案 C。** B 模式 Attention + DDR 已完成真实模型 CPU/HF 单层对拍、30 层不同 K/V 隔离及非空缓存 RESET 实板验证。PC1 新交付的 RK/NPU v40 Q/K/V 已通过离线复核；团队已决定以[方案 B 分工与验收计划](docs/TEAM_WORK_PLAN_B_H2C_RECOVERY_20261018.md)解决 H2C deadline / SGDMA 恢复问题，再对拍本批输入的实际 FPGA 回包。完整异构模型与 U/M 尚未验收。历史进度和数据审查见[10-18 进度快照](docs/TEAM_PROGRESS_AND_NEXT_STEPS_20261018.md)与[v40 输入审查](docs/NPU_V40_CAPTURE_REVIEW_20261018.md)。
 
 ```text
 PC：离线重要性分析 / reference / 开发工具 / 用户终端
@@ -15,7 +15,7 @@ RK3576：继续下一层 → logits / sampling / detokenizer → 用户文字
 
 RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整模型权重；不走PCIe持续权重流送。ERAM名义680 KiB，约204 KiB工作集只是早期候选预算；当前联合功能工程使用98/272 ERAM、4/240 DSP，仍有disRAM占用，“不用disRAM”的目标尚未达到。
 
-当前关键工作：**PC1 审核 v40 NPU 来源、host 接线和数值质量 → PC2 统一传输能力声明与超时/恢复证据 → B/PC2 做新输入实板单层对拍 → 真实30层B → U/M集成与质量/性能对照**。当前功能 bit 为 B/MAX_T64/SCORE_SHIFT3；[功能版 RTL、TD 配置和重建脚本](fpga_kv_attention/functional_b64s3/README.md)已入库，重建仍需独立的厂商 DDR-only 基础工程及其 IP。stories15M/42M/70M 保留为参考/单元验证。
+当前关键工作：**B+PC2 冻结 host 可读状态接口 → B 做新 RTL/bit、PC2 做驱动中止与跨进程恢复、PC1 接 host/数值门槛 → 实板故障负例和旧功能回归 → 新 NPU 输入单层对拍 → 真实30层B → U/M实验**。当前功能 bit 为 B/MAX_T64/SCORE_SHIFT3；[功能版 RTL、TD 配置和重建脚本](fpga_kv_attention/functional_b64s3/README.md)已入库，重建仍需独立的厂商 DDR-only 基础工程及其 IP。stories15M/42M/70M 保留为参考/单元验证。
 
 阅读顺序：
 
