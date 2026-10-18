@@ -1,0 +1,214 @@
+--- a/uisrc/01_rtl/imx415_pcie_top.v
++++ b/uisrc/01_rtl/imx415_pcie_top.v
+@@ -939,6 +939,31 @@
+ // ====================================================================
+ // SGDMA Application (identical to Phase 8)
+ // ====================================================================
++wire        ddr_dfi_clk;
++wire        ddr_pll_locked;
++wire        ddr_init_cal_done;
++wire [7:0]  ddr_init_cal_err;
++wire [7:0]  ddr_init_cal_step;
++wire        ddr_ready;
++assign ddr_ready = ddr_pll_locked & ddr_init_cal_done;
++wire [3:0]  ddr_axi_awid, ddr_axi_arid;
++wire [27:0] ddr_axi_awaddr, ddr_axi_araddr;
++wire [7:0]  ddr_axi_awlen, ddr_axi_arlen;
++wire [2:0]  ddr_axi_awsize, ddr_axi_arsize;
++wire [1:0]  ddr_axi_awburst, ddr_axi_arburst;
++wire        ddr_axi_awvalid, ddr_axi_arvalid, ddr_axi_awready, ddr_axi_arready;
++wire [127:0] ddr_axi_wdata;
++wire [15:0] ddr_axi_wstrb;
++wire        ddr_axi_wlast, ddr_axi_wvalid, ddr_axi_wready;
++wire [3:0]  ddr_axi_bid, ddr_axi_rid;
++wire [1:0]  ddr_axi_bresp, ddr_axi_rresp;
++wire        ddr_axi_bvalid, ddr_axi_bready, ddr_axi_rvalid, ddr_axi_rready;
++wire [127:0] ddr_axi_rdata;
++wire        ddr_axi_rlast;
++
++
++wire attention_fault;
++wire [3:0] attention_error;
+ sgdma_app #(
+     .ODATA_WIDTH    (DATA_WIDTH),
+     .OKEEP_WIDTH    (KEEP_WIDTH),
+@@ -1016,39 +1041,39 @@
+     .c2h_sts_3                  (c2h_sts_3),
+     .h2c_sts_3                  (h2c_sts_3),
+     .dfi_clk                    (ddr_dfi_clk),
+-    .dfi_rst_n                  (1'b0),
+-    .ddr_ready                  (1'b0),
+-    .ddr_fault                  (),
+-    .ddr_error_code             (),
+-    .ddr_axi_awid               (),
+-    .ddr_axi_arid               (),
+-    .ddr_axi_awaddr             (),
+-    .ddr_axi_araddr             (),
+-    .ddr_axi_awlen              (),
+-    .ddr_axi_arlen              (),
+-    .ddr_axi_awsize             (),
+-    .ddr_axi_arsize             (),
+-    .ddr_axi_awburst            (),
+-    .ddr_axi_arburst            (),
+-    .ddr_axi_awvalid            (),
+-    .ddr_axi_arvalid            (),
+-    .ddr_axi_awready            (1'b0),
+-    .ddr_axi_arready            (1'b0),
+-    .ddr_axi_wdata              (),
+-    .ddr_axi_wstrb              (),
+-    .ddr_axi_wlast              (),
+-    .ddr_axi_wvalid             (),
+-    .ddr_axi_wready             (1'b0),
+-    .ddr_axi_bid                (4'd0),
+-    .ddr_axi_bresp              (2'd0),
+-    .ddr_axi_bvalid             (1'b0),
+-    .ddr_axi_bready             (),
+-    .ddr_axi_rid                (4'd0),
+-    .ddr_axi_rdata              (128'd0),
+-    .ddr_axi_rresp              (2'd0),
+-    .ddr_axi_rlast              (1'b0),
+-    .ddr_axi_rvalid             (1'b0),
+-    .ddr_axi_rready             ()
++    .dfi_rst_n                  (int_por_done_r),
++    .ddr_ready                  (ddr_ready),
++    .ddr_fault                  (attention_fault),
++    .ddr_error_code             (attention_error),
++    .ddr_axi_awid               (ddr_axi_awid),
++    .ddr_axi_arid               (ddr_axi_arid),
++    .ddr_axi_awaddr             (ddr_axi_awaddr),
++    .ddr_axi_araddr             (ddr_axi_araddr),
++    .ddr_axi_awlen              (ddr_axi_awlen),
++    .ddr_axi_arlen              (ddr_axi_arlen),
++    .ddr_axi_awsize             (ddr_axi_awsize),
++    .ddr_axi_arsize             (ddr_axi_arsize),
++    .ddr_axi_awburst            (ddr_axi_awburst),
++    .ddr_axi_arburst            (ddr_axi_arburst),
++    .ddr_axi_awvalid            (ddr_axi_awvalid),
++    .ddr_axi_arvalid            (ddr_axi_arvalid),
++    .ddr_axi_awready            (ddr_axi_awready),
++    .ddr_axi_arready            (ddr_axi_arready),
++    .ddr_axi_wdata              (ddr_axi_wdata),
++    .ddr_axi_wstrb              (ddr_axi_wstrb),
++    .ddr_axi_wlast              (ddr_axi_wlast),
++    .ddr_axi_wvalid             (ddr_axi_wvalid),
++    .ddr_axi_wready             (ddr_axi_wready),
++    .ddr_axi_bid                (ddr_axi_bid),
++    .ddr_axi_bresp              (ddr_axi_bresp),
++    .ddr_axi_bvalid             (ddr_axi_bvalid),
++    .ddr_axi_bready             (ddr_axi_bready),
++    .ddr_axi_rid                (ddr_axi_rid),
++    .ddr_axi_rdata              (ddr_axi_rdata),
++    .ddr_axi_rresp              (ddr_axi_rresp),
++    .ddr_axi_rlast              (ddr_axi_rlast),
++    .ddr_axi_rvalid             (ddr_axi_rvalid),
++    .ddr_axi_rready             (ddr_axi_rready)
+ );
+ 
+ // ====================================================================
+@@ -1094,35 +1119,14 @@
+         .rst_n       (pll_lock),
+         .tx          (uart_tx),
+         .rx          (uart_rx),
+-        .status({8'd0,ddr_diag_snapshot[7:0]}),
+-        .frame_count(ddr_diag_snapshot[39:8])
++        .status({8'd0,attention_snapshot[7:0]}),
++        .frame_count(attention_snapshot[39:8])
+     );
+ 
+ // ====================================================================
+-// DDR3 (ui_ddr) - DDR-only combined synthesis placeholder.
+-// 100MHz ref shared with mipi_ref_clk (T13); AXI4 tied off for now.
+-// ====================================================================
+-wire        ddr_dfi_clk;
+-wire        ddr_pll_locked;
+-wire        ddr_init_cal_done;
+-wire [7:0]  ddr_init_cal_err;
+-wire [7:0]  ddr_init_cal_step;
+-wire        ddr_ready = ddr_pll_locked & ddr_init_cal_done;
+-wire [3:0]  ddr_axi_awid, ddr_axi_arid;
+-wire [27:0] ddr_axi_awaddr, ddr_axi_araddr;
+-wire [7:0]  ddr_axi_awlen, ddr_axi_arlen;
+-wire [2:0]  ddr_axi_awsize, ddr_axi_arsize;
+-wire [1:0]  ddr_axi_awburst, ddr_axi_arburst;
+-wire        ddr_axi_awvalid, ddr_axi_arvalid, ddr_axi_awready, ddr_axi_arready;
+-wire [127:0] ddr_axi_wdata;
+-wire [15:0] ddr_axi_wstrb;
+-wire        ddr_axi_wlast, ddr_axi_wvalid, ddr_axi_wready;
+-wire [3:0]  ddr_axi_bid, ddr_axi_rid;
+-wire [1:0]  ddr_axi_bresp, ddr_axi_rresp;
+-wire        ddr_axi_bvalid, ddr_axi_bready, ddr_axi_rvalid, ddr_axi_rready;
+-wire [127:0] ddr_axi_rdata;
+-wire        ddr_axi_rlast;
+-
++// DDR3 (ui_ddr) - functional Attention AXI backend.
++// 100MHz ref shared on T13; the Attention endpoint owns AXI4.
++// ====================================================================
+ ui_ddr_inst_reference u_ddr (
+     .sys_clk_100m       (mipi_ref_clk_bufg),
+     .sys_rst_n          (int_por_done_r),
+@@ -1186,55 +1190,14 @@
+ );
+ 
+ 
+-// DDR-only diagnostic build: selftest owns AXI; Attention is held in reset.
+-wire ddr_test_busy, ddr_test_done, ddr_test_pass, ddr_test_fail;
+-wire [7:0] ddr_test_error;
+-wire [3:0] ddr_test_state;
+-wire [1:0] ddr_test_pattern;
+-wire [31:0] ddr_checked_beats;
+-wire [27:0] ddr_first_bad_addr;
+-wire [127:0] ddr_first_expected, ddr_first_actual;
+-wire [7:0] ddr_status_byte = {1'b1,ddr_test_fail,ddr_test_pass,ddr_test_done,
+-                             ddr_test_busy,ddr_ready,ddr_init_cal_done,ddr_pll_locked};
+-wire [31:0] ddr_detail = {ddr_test_error,ddr_init_cal_err,ddr_init_cal_step,
+-                         2'd0,ddr_test_pattern,ddr_test_state};
+-wire [39:0] ddr_diag_snapshot;
+-diag_snapshot_cdc u_ddr_snapshot(
+- .src_clk(ddr_dfi_clk),.src_rst_n(int_por_done_r),.src_data({ddr_detail,ddr_status_byte}),
+- .dst_clk(app_auxclk),.dst_rst_n(int_por_done_r & pll_lock),.dst_data(ddr_diag_snapshot));
+-ddr_selftest u_ddr_selftest(
+- .clk(ddr_dfi_clk),.rst_n(int_por_done_r),.ddr_ready(ddr_ready),
+- .busy(ddr_test_busy),.done(ddr_test_done),.passed(ddr_test_pass),.failed(ddr_test_fail),
+- .error_code(ddr_test_error),.debug_state(ddr_test_state),.pattern(ddr_test_pattern),
+- .checked_beats(ddr_checked_beats),.first_bad_addr(ddr_first_bad_addr),
+- .first_expected(ddr_first_expected),.first_actual(ddr_first_actual),
+- .m_axi_awid(ddr_axi_awid),
+- .m_axi_arid(ddr_axi_arid),
+- .m_axi_awaddr(ddr_axi_awaddr),
+- .m_axi_araddr(ddr_axi_araddr),
+- .m_axi_awlen(ddr_axi_awlen),
+- .m_axi_arlen(ddr_axi_arlen),
+- .m_axi_awsize(ddr_axi_awsize),
+- .m_axi_arsize(ddr_axi_arsize),
+- .m_axi_awburst(ddr_axi_awburst),
+- .m_axi_arburst(ddr_axi_arburst),
+- .m_axi_awvalid(ddr_axi_awvalid),
+- .m_axi_arvalid(ddr_axi_arvalid),
+- .m_axi_awready(ddr_axi_awready),
+- .m_axi_arready(ddr_axi_arready),
+- .m_axi_wdata(ddr_axi_wdata),
+- .m_axi_wstrb(ddr_axi_wstrb),
+- .m_axi_wlast(ddr_axi_wlast),
+- .m_axi_wvalid(ddr_axi_wvalid),
+- .m_axi_wready(ddr_axi_wready),
+- .m_axi_bid(ddr_axi_bid),
+- .m_axi_rid(ddr_axi_rid),
+- .m_axi_bresp(ddr_axi_bresp),
+- .m_axi_rresp(ddr_axi_rresp),
+- .m_axi_bvalid(ddr_axi_bvalid),
+- .m_axi_rvalid(ddr_axi_rvalid),
+- .m_axi_bready(ddr_axi_bready),
+- .m_axi_rready(ddr_axi_rready),
+- .m_axi_rdata(ddr_axi_rdata),
+- .m_axi_rlast(ddr_axi_rlast));
++// Functional profile: B/FP16 storage, T<=64, scaled Q8.8 arithmetic.
++// UART S=A7 is ready/healthy. F=A3<cal_err><cal_step><score_shift><error>.
++wire [39:0] attention_snapshot;
++wire [39:0] attention_snapshot_source = {8'hA3,ddr_init_cal_err,ddr_init_cal_step,
++                                        4'd3,attention_error,4'hA,attention_fault,
++                                        ddr_ready,ddr_init_cal_done,ddr_pll_locked};
++diag_snapshot_cdc u_attention_snapshot (
++ .src_clk(ddr_dfi_clk),.src_rst_n(int_por_done_r),.src_data(attention_snapshot_source),
++ .dst_clk(app_auxclk),.dst_rst_n(int_por_done_r & pll_lock),.dst_data(attention_snapshot));
++
+ endmodule

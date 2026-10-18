@@ -1,0 +1,52 @@
+set_ippin_assignment { ddr_dq[0] } {LOCATION = U8; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[1] } {LOCATION = T8; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[2] } {LOCATION = U9; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[3] } {LOCATION = U7; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[4] } {LOCATION = V10; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[5] } {LOCATION = P10; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[6] } {LOCATION = V9; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[7] } {LOCATION = R10; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[8] } {LOCATION = U6; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[9] } {LOCATION = V5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[10] } {LOCATION = T5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[11] } {LOCATION = V4; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[12] } {LOCATION = V1; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[13] } {LOCATION = U1; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[14] } {LOCATION = V2; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dq[15] } {LOCATION = U2; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dqs_n[0] } {LOCATION = T9; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_dqs_p[0] } {LOCATION = T10; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_dqs_n[1] } {LOCATION = U4; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_dqs_p[1] } {LOCATION = U3; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_dm[0] } {LOCATION = N9; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_dm[1] } {LOCATION = V6; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_ck_n[0] } {LOCATION = N7; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_ck_p[0] } {LOCATION = P7; IOSTANDARD = DIFF_SSTL135; }
+set_ippin_assignment { ddr_ras_n } {LOCATION = T6; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_cas_n } {LOCATION = R1; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_we_n } {LOCATION = R2; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_reset_n } {LOCATION = P9; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_cke[0] } {LOCATION = R8; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_cs_n[0] } {LOCATION = R5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_odt[0] } {LOCATION = P1; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[0] } {LOCATION = T4; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[1] } {LOCATION = N4; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[2] } {LOCATION = R6; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[3] } {LOCATION = T3; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[4] } {LOCATION = N3; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[5] } {LOCATION = P5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[6] } {LOCATION = N5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[7] } {LOCATION = P8; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[8] } {LOCATION = M5; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[9] } {LOCATION = R7; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[10] } {LOCATION = P2; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[11] } {LOCATION = N6; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[12] } {LOCATION = P3; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_addr[13] } {LOCATION = N8; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_ba[0] } {LOCATION = T1; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_ba[1] } {LOCATION = P4; IOSTANDARD = SSTL135; }
+set_ippin_assignment { ddr_ba[2] } {LOCATION = R3; IOSTANDARD = SSTL135; }
+set_ipinst_assignment {u_ddrmc_top/u_ddr_phy/u_ddrphy_top/u_ddrphy_ppc/u_ddrppc} {LOCATION = X65Y40Z0}
+set_ipinst_assignment {u_ddrmc_top/u_ddr_phy/u_ddrphy_top/u_ddrphy_bank/bkIdx[1]$bk_used$u_ddrbank_top/u_ddrbank} {LOCATION = X81Y40Z0}
+set_ipinst_assignment {u_ddrmc_top/u_ddr_phy/u_ddrphy_clk_gen/u_ddrphy_pll0/pll_inst} { LOCATION = X81Y79Z0}
+set_ipinst_assignment {u_ddrmc_top/u_ddr_phy/u_ddrphy_clk_gen/u_ddrphy_pll1/pll_inst} { LOCATION = X81Y40Z0}

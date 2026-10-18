@@ -15,7 +15,7 @@ RK3576：继续下一层 → logits / sampling / detokenizer → 用户文字
 
 RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整模型权重；不走PCIe持续权重流送。ERAM名义680 KiB，约204 KiB工作集只是早期候选预算；当前联合功能工程使用98/272 ERAM、4/240 DSP，仍有disRAM占用，“不用disRAM”的目标尚未达到。
 
-当前关键工作：**PC1 审核 v40 NPU 来源、host 接线和数值质量 → PC2 统一传输能力声明与超时/恢复证据 → B/PC2 做新输入实板单层对拍 → 真实30层B → U/M集成与质量/性能对照**。当前功能bit为B/MAX_T64/SCORE_SHIFT3；对应功能RTL/TD和新工具仍以本地交付包为主，详见进度文档中的版本与材料索引。stories15M/42M/70M保留为参考/单元验证。
+当前关键工作：**PC1 审核 v40 NPU 来源、host 接线和数值质量 → PC2 统一传输能力声明与超时/恢复证据 → B/PC2 做新输入实板单层对拍 → 真实30层B → U/M集成与质量/性能对照**。当前功能 bit 为 B/MAX_T64/SCORE_SHIFT3；[功能版 RTL、TD 配置和重建脚本](fpga_kv_attention/functional_b64s3/README.md)已入库，重建仍需独立的厂商 DDR-only 基础工程及其 IP。stories15M/42M/70M 保留为参考/单元验证。
 
 阅读顺序：
 

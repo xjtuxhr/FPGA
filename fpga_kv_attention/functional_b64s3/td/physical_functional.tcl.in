@@ -1,0 +1,15 @@
+import_device ph1_90.db -package PH1A90SEG324 -speed 2
+open_project {@BUILD_ROOT@/attention_ddr.prj} -noanalyze
+import_db {@BUILD_ROOT@/attention_gate.db}
+set_param route fix_hold high
+place
+update_timing -mode manhattan
+report_timing_summary -file {@BUILD_ROOT@/attention_place.timing}
+route
+update_timing -mode final
+report_area -io_info -file {@BUILD_ROOT@/attention_phy.area}
+report_timing_summary -file {@BUILD_ROOT@/attention_final.timing}
+check_timing -verbose -file {@BUILD_ROOT@/attention_check.timing}
+export_db {@BUILD_ROOT@/attention_final.db}
+bitgen -bit {@BUILD_ROOT@/attention_ddr.bit}
+exit

@@ -4,6 +4,8 @@
 
 对应团队文档：[PLAN](../PLAN.md)、[COMPUTE_ARCHITECTURE](../docs/COMPUTE_ARCHITECTURE.md)、[UNKNOWNS](../docs/UNKNOWNS.md)。
 
+2026-10-14 已验证的 Attention + DDR **功能版源码、TD 配置与重建脚本**见 [functional_b64s3](functional_b64s3/README.md)。本页后续的“未做 P&R/DDR”描述只适用于早期算子库，不代表该功能版现状。
+
 ## 目录
 
 ```text

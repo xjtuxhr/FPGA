@@ -1,0 +1,7 @@
+# Generated TD outputs and vendor IP implementations belong outside this source package.
+*.bit
+*.db
+*.mif
+*.log
+*_Runs/
+/build/

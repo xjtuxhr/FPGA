@@ -1,0 +1,13 @@
+set ADCList {@BUILD_ROOT@/uisrc/04_pin/imx415_pcie.adc}
+set IpADCList {al_pcie_ip @BUILD_ROOT@/al_ip/PH1_LOGIC_PCIE.adc ui_ddr @BUILD_ROOT@/al_ip/ui_ddr/ui_ddr.adc}
+set IpSDCList {al_pcie_ip @BUILD_ROOT@/al_ip/PH1_LOGIC_PCIE.sdc ui_ddr @BUILD_ROOT@/al_ip/ui_ddr/ui_ddr.sdc}
+set SDCList {@BUILD_ROOT@/uisrc/04_pin/imx415_pcie.sdc}
+set area_option -packarea
+set device_name ph1_90.db
+set end_step opt_gate
+set package_name PH1A90SEG324
+set prj_name attention_ddr
+set run_type syn
+set speed 2
+set start_step read_design
+set top_model_name imx415_pcie_top

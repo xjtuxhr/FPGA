@@ -1,0 +1,45 @@
+##============================================================
+## Pin assignments for IMX415 Camera + PCIe (PH1A90SEG324 migration)
+## PH1A90SEG324-2, AFC03 board
+## PCIe: BANK83 (Gen2 x1)
+## Bank 12: VCCIO=1.8V (sys_clk, pcie_mperst, uart, mipi_ref_clk)
+## Camera: BANK85 (LVCMOS18/LVDS18)
+##============================================================
+
+# ===== PLL Placement Constraint =====
+# TODO: 在TD中Elaborate后确认PH1A90 PLL可用位置，暂注释
+# set_inst_assignment {u_sgdma_pll/pll_inst} {LOCATION = X0Y0Z0}
+
+# ===== System Clock 25MHz (Bank 12, VCCIO=1.8V) =====
+set_pin_assignment	{ sys_clk }				{ LOCATION = T16; IOSTANDARD = LVCMOS18; }
+
+# ===== PCIe PERST# from RC (RK3576, Bank 12, VCCIO=1.8V) =====
+set_pin_assignment	{ pcie_mperst }			{ LOCATION = U14; IOSTANDARD = LVCMOS18; PULLTYPE = PULLUP; }
+
+# ===== Debug UART (115200 8N1, LVCMOS18) =====
+set_pin_assignment	{ uart_rx }				{ LOCATION = V11; IOSTANDARD = LVCMOS18; PULLTYPE = PULLUP; }
+set_pin_assignment	{ uart_tx }				{ LOCATION = U11; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; }
+
+# ===== IMX415 I2C (BANK85, LVCMOS18) =====
+set_pin_assignment	{ cam_scl }				{ LOCATION = B14; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; PULLTYPE = PULLUP; }
+set_pin_assignment	{ cam_sda }				{ LOCATION = A14; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; PULLTYPE = PULLUP; }
+
+# ===== IMX415 MCLK output (12MHz toggle, BANK85, LVCMOS18) =====
+set_pin_assignment	{ cam_mclk }			{ LOCATION = A18; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; PULLTYPE = NONE; }
+
+# ===== IMX415 XCLR hardware reset (active-low on sensor, FPGA drives high) =====
+set_pin_assignment	{ cam_xclr }			{ LOCATION = B18; IOSTANDARD = LVCMOS18; DRIVESTRENGTH = 8; PULLTYPE = NONE; }
+
+# ===== MIPI Reference Clock 100MHz (LVDS18, T13/T14 differential pair) =====
+set_pin_assignment	{ mipi_ref_clk_p }		{ LOCATION = T13;  IOSTANDARD = LVDS18; PULLTYPE = NONE; }
+
+# ===== MIPI CSI-2 Clock Lane (LVDS18) =====
+# TODO: 需确认AFC03板MIPI管脚
+set_pin_assignment	{ mipi_clk_hs_rx_p }	{ LOCATION = E13; IOSTANDARD = LVDS18; PULLTYPE = NONE; }
+
+# ===== MIPI CSI-2 Data Lanes (LVDS18, INDEL=20) =====
+# TODO: 需确认AFC03板MIPI管脚
+set_pin_assignment	{ mipi_data_hs_p[0] }	{ LOCATION = C14; IOSTANDARD = LVDS18; PULLTYPE = NONE; INDEL = 20; }
+set_pin_assignment	{ mipi_data_hs_p[1] }	{ LOCATION = D14;  IOSTANDARD = LVDS18; PULLTYPE = NONE; INDEL = 20; }
+set_pin_assignment	{ mipi_data_hs_p[2] }	{ LOCATION = A15; IOSTANDARD = LVDS18; PULLTYPE = NONE; INDEL = 20; }
+set_pin_assignment	{ mipi_data_hs_p[3] }	{ LOCATION = G17;  IOSTANDARD = LVDS18; PULLTYPE = NONE; INDEL = 20; }

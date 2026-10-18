@@ -1,0 +1,6 @@
+cd {@BUILD_ROOT@/build/syn_1}
+source @TD_ROOT@/scripts/DefaultFlow.tcl
+file copy -force attention_ddr_gate.db {@BUILD_ROOT@/attention_gate.db}
+file copy -force attention_ddr_gate.area {@BUILD_ROOT@/attention_gate.area}
+file copy -force attention_ddr_gate.timing {@BUILD_ROOT@/attention_gate.timing}
+exit

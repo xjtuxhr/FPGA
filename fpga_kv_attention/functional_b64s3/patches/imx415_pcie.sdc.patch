@@ -1,0 +1,11 @@
+--- a/uisrc/04_pin/imx415_pcie.sdc
++++ b/uisrc/04_pin/imx415_pcie.sdc
+@@ -36,8 +36,6 @@
+ ## ============================================================
+ ## Async FIFO gray-code CDC (usr_clk <-> dfi_clk)
+ ## ============================================================
+-set_false_path -from [get_cells {*wgray_sync1_r_reg*}] -to [get_cells {*wgray_sync2_r_reg*}]
+-set_false_path -from [get_cells {*rgray_sync1_w_reg*}] -to [get_cells {*rgray_sync2_w_reg*}]
+ 
+ ## ============================================================
+ ## Hold margin: �� 0.1ns ԣ����ԭ hold ������ 2ps��̫����

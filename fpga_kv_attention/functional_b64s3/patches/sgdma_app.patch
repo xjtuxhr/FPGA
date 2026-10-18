@@ -1,0 +1,11 @@
+--- a/uisrc/03_ip/sgdma/sgdma_app/src/sgdma_app.v
++++ b/uisrc/03_ip/sgdma/sgdma_app/src/sgdma_app.v
+@@ -516,7 +516,7 @@
+     );
+ `endif
+ `ifdef AXI4ST_BUS_EN
+-    v2_endpoint_cdc u_v2_endpoint_cdc (
++    v2_endpoint_cdc #(.MAX_T(64), .LAYERS(30), .SCORE_SHIFT(3)) u_v2_endpoint_cdc (
+         .usr_clk                    (usr_clk),
+         .usr_rst_n                  (usr_rst_n),
+         .m0_axis_h2c_tdata          (m0_axis_h2c_tdata[0*ODATA_WIDTH+:ODATA_WIDTH]),
