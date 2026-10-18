@@ -1,6 +1,6 @@
 # KVmix_on_FPGA
 
-更新：2026-10-18。**正式模型：HuggingFaceTB/SmolLM-135M；正式架构：方案 C。** B 模式 Attention + DDR 已完成真实模型 CPU/HF 单层对拍、30 层不同 K/V 隔离及非空缓存 RESET 实板验证。下一步接入实际 RK/NPU QKV，并解决 H2C deadline / 故障恢复门槛；完整异构模型与 U/M 尚未验收。详见[当前进度与团队分工](docs/TEAM_PROGRESS_AND_NEXT_STEPS_20261018.md)。
+更新：2026-10-18。**正式模型：HuggingFaceTB/SmolLM-135M；正式架构：方案 C。** B 模式 Attention + DDR 已完成真实模型 CPU/HF 单层对拍、30 层不同 K/V 隔离及非空缓存 RESET 实板验证。PC1 新交付的 RK/NPU v40 Q/K/V 已通过离线复核；下一步解决 H2C deadline / 故障恢复门槛，再对拍本批输入的实际 FPGA 回包。完整异构模型与 U/M 尚未验收。详见[当前进度与团队分工](docs/TEAM_PROGRESS_AND_NEXT_STEPS_20261018.md)和[v40 输入审查](docs/NPU_V40_CAPTURE_REVIEW_20261018.md)。
 
 ```text
 PC：离线重要性分析 / reference / 开发工具 / 用户终端
@@ -15,7 +15,7 @@ RK3576：继续下一层 → logits / sampling / detokenizer → 用户文字
 
 RK侧4GB LPDDR4X与FPGA侧256 MiB DDR是不同存储域。FPGA不默认存完整模型权重；不走PCIe持续权重流送。ERAM名义680 KiB，约204 KiB工作集只是早期候选预算；当前联合功能工程使用98/272 ERAM、4/240 DSP，仍有disRAM占用，“不用disRAM”的目标尚未达到。
 
-当前关键工作：**PC1 导出真实 NPU post-RoPE QKV并接host → PC2 统一传输能力声明与超时/恢复证据 → B 重算参考并复核单层对拍 → 真实30层B → U/M集成与质量/性能对照**。当前功能bit为B/MAX_T64/SCORE_SHIFT3；对应功能RTL/TD和新工具仍以本地交付包为主，详见进度文档中的版本与材料索引。stories15M/42M/70M保留为参考/单元验证。
+当前关键工作：**PC1 审核 v40 NPU 来源、host 接线和数值质量 → PC2 统一传输能力声明与超时/恢复证据 → B/PC2 做新输入实板单层对拍 → 真实30层B → U/M集成与质量/性能对照**。当前功能bit为B/MAX_T64/SCORE_SHIFT3；对应功能RTL/TD和新工具仍以本地交付包为主，详见进度文档中的版本与材料索引。stories15M/42M/70M保留为参考/单元验证。
 
 阅读顺序：
 

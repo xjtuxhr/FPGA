@@ -2,7 +2,7 @@
 
 **当前阶段：B 模式 Attention + DDR 已完成实板功能验证；正在准备实际 RK/NPU 输入的单层接入。** 已通过的项目包括真实模型 CPU/HF 输入对拍、不同层 K/V 隔离和非空缓存 RESET。实际 NPU→FPGA→O projection 的模型调用链、完整模型质量及 U/M 实板实验仍需推进。
 
-本文按 2026-10-18 在 B 侧实际收到的文件、已完成的独立复核，以及本次 GitHub 同步结果整理。最新完整实板回传为 2026-10-16；本文没有重新操作板卡。PC1 已告知正在用 NPU 生成 QKV，截至本次整理尚未向 B 交付新的实际 NPU capture。
+本文按 2026-10-18 在 B 侧实际收到的文件、已完成的独立复核，以及 GitHub 同步结果整理。最新完整实板回传为 2026-10-16；本文没有重新操作板卡。**当日晚些时候 PC1 已交付 v40 RK/NPU Q/K/V 包，B 已完成离线逐字节复核；见[v40 专项审查](NPU_V40_CAPTURE_REVIEW_20261018.md)。本批 NPU 输入尚无 FPGA 实板回包。**
 
 ## 1. 团队共同目标与当前配置
 
@@ -43,14 +43,16 @@ PC2：PCIe C2H → PC1：O projection / residual / MLP / 下一层
 | 真实模型单层输入 | CPU/HF post-RoPE 层 0、pos0–7：39 请求、78 原始帧；8 次 Attention、4,608 个 FP16 输出全部逐位一致 | 输入是真实模型数据，生成端是 PC CPU/HF |
 | 不同层 K/V 与非空 RESET | 517 请求、1,034 原始帧；484 次 Attention、278,784 个 FP16 输出全部逐位一致 | 覆盖 30 层、pos0–7、两轮不同数据及哨兵；不是完整模型执行 |
 | RK/NPU 模型主体 | 已有 v39 NPU 调度结果；报告 9 forwards、1,899 次 NPU 调用、270 次软件 Attention | 该阶段 Attention 为 CPU reference，不能计作 FPGA 模型闭环 |
-| 实际 NPU 单层接入准备 | B 已准备导出清单、校验/参考生成器、诊断接口和交接包；15 项离线测试通过 | 未收到实际 NPU capture；新增接口尚未实板运行 |
+| 实际 NPU 单层接入准备 | PC1 v40 已交付；B 将 8 份实际声明的 NPU Q/K/V 重新生成 wire/reference，49/49 文件逐字节一致；原工具 15 项离线测试通过 | 来源按 PC1 声明和证据记录；本批输入尚无 FPGA 实板回包，H2C deadline 门槛仍未通过 |
 | U/M + RPC tail 功能集成 | 相关模块已有开发/局部验证，尚无完整量化 DDR 路径和实板验收 | 下一阶段，不能计作 KVmix 已完整上板 |
 
-### 已通过的两项关键复核
+### 已通过的板测与新增离线复核
 
 **真实模型输入：**PC1 v5 的确包含真实 SmolLM-135M post-RoPE Q/K/V，来源为 CPU/HF。B 核对 52 个文件记录、F32→FP16 输入、完整原始帧，并从实际 wire 重算定点/float64 reference。8 帧实际 FPGA 输出与定点 reference 全部相同。相对同 wire 的 float64 Attention，最大绝对误差为 `0.0057296753`，最大单帧 RMSE 为 `0.0028731977`，各帧相对 L2 为 `6.9047%–8.8864%`。是否满足模型质量要求，仍由 PC1 完成层输出和整模型评估。
 
 **层间隔离与 RESET：**PC2 补交的 LAYER_ID_V1 已独立复核。每个 epoch、每个位置的 30 层 K/V 均不同；layer0/29 的哨兵输出分别满足预期 `+0.125/-0.25`；在所有 30 层已有 8 个位置历史后 RESET，换数据从 pos0 重建至 pos7 通过。当前不再等待这批隔离结果，也不需要为已通过用例重跑板卡。
+
+**新收到的 NPU 输入（仅离线）：**v40 layer0 pos0–7 已按 PC1 声明的 RK/NPU 来源接收；48 个包内制品哈希和 10 个原始采集文件哈希匹配，B 从原始 F32 重算的 49 个文件均与交付包相同。新输入与 CPU/HF v5 各位置均不同。详情与来源证据的边界见[v40 专项审查](NPU_V40_CAPTURE_REVIEW_20261018.md)。
 
 DDR 层地址确实在 RTL 中计算：每 token K384B+V384B，共 768B；`layer_base=layer×64×768`，`token_base=layer_base+position×768`。30 层占 1,474,560B。静态 RTL、本地 AXI 地址检查与实板行为证据相互支持；目前没有实板 AW/AR 波形抓取，不将其描述为物理总线全地址验证。RESET 使逻辑历史失效，无需物理清零 DDR。
 
@@ -110,7 +112,7 @@ PC2 需要统一实现、binding、status、host metadata 和故障恢复证据�
 
 | 优先级 | 工作 | 交付物 / 完成条件 |
 |---|---|---|
-| P0，现在进行 | 导出 RK/NPU 实际生成的 layer0、pos0–7 post-RoPE Q/K/V | 每位置 F32LE 3840B（960 元素）；日志、导出源码、模型/量化制品 hash、runtime/driver、实际 scale/反量化和 RoPE 说明、manifest |
+| P0，已交付、继续审核 | v40 layer0、pos0–7 post-RoPE Q/K/V 已交付；核对来源和量化依据，补已有的最终运行记录/host 版本 | 8×3840B F32、manifest、exporter 源码和位置日志已到；补完整 stdout/summary、host/bridge commit 后可审查执行链 |
 | P0，可并行 | 交付当前 host/bridge 源码版本，核对正式调用入口和能力门控 | Git commit 或带 hash 的源码；明确谁负责帧/seq，避免双重封装；False 能力不得被旧属性覆盖 |
 | P1，数据就绪后 | 审核 NPU、wire 转换、定点 Attention 的分段误差；明确接受标准 | 用本批 NPU wire 重算参考，分别报告前端量化、FP16 转换、Attention 和 O/层输出误差 |
 | P1，传输门槛解决后 | 把真实 FPGA 返回接回 O projection、residual、MLP | 单层执行日志证明输出实际来自 C2H；预录重放与实时 NPU→FPGA 接线分开记录 |
@@ -134,7 +136,7 @@ v5 已有真实模型输入，继续作为已通过基准。新 NPU 数据因 W8
 | 优先级 | 工作 | 交付物 / 完成条件 |
 |---|---|---|
 | P0，当前 | 保持 B64S3 功能基线，交付已准备好的 NPU 单层工具包 | bit/工程 hash、UART/失败语义、工具包 hash 可供 PC1/PC2核对；本阶段无需改 bit |
-| P0，收到数据即做 | 检查 NPU 文件来源/布局/范围，生成 FP16 wire、定点与 float64 golden | 8 份输入、8 份各类参考、清单；定位 Q8.8 溢出/下溢及转换异常，不把输入问题混入硬件误差 |
+| P0，已完成离线复核 | 核对 v40 文件布局/范围，重新生成 FP16 wire、定点与 float64 golden | 49/49 文件逐字节一致，Q8.8 范围外 0 项；详见[v40 专项审查](NPU_V40_CAPTURE_REVIEW_20261018.md) |
 | P1，新回传到达 | 独立审核 NPU 实板原始帧和数值 | actual H2C 等于本批 NPU payload；actual C2H 逐位等于新定点参考；与 PC1 一起评估层输出 |
 | P1，可并行 | 整理功能 RTL/TD 的可追溯源码提交与构建说明 | 自有 RTL、约束/脚本、IP 版本参数和冻结包索引相符；在工程副本核对路径，不覆盖已验证工程 |
 | P2，B 接入和数值验收后 | 将 U/M quant/dequant、metadata、RPC tail 接入真实 DDR 路径 | 先仿真迁移、组边界/3-bit packing、RESET/隔离，再另出 bit、实板对拍和容量/质量实验 |
@@ -143,8 +145,8 @@ v5 已有真实模型输入，继续作为已通过基准。新 NPU 数据因 W8
 
 ## 6. 后续联调顺序与验收
 
-1. **并行准备：**PC1 导出真实 NPU capture 和 host/bridge；PC2 处理 deadline/恢复门槛；B 整理 B 源码、核验数据、重算 reference。PC1 导出 NPU 数据不依赖 FPGA 门槛先解除。
-2. **离线核验：**来源/模型/scale/RoPE/形状/hash/有限值通过，确定数值接受标准；以实际 NPU wire 生成期望帧。旧 v5 golden 不直接用于新 NPU 输入。
+1. **并行准备：**PC1 的 v40 capture 已交付；PC1 继续审核来源、host/bridge 和质量标准。PC2 处理 deadline/恢复门槛；B 已完成 v40 的离线哈希、范围与参考重算，并可整理 B 源码。
+2. **离线核验：**本批 v40 wire 与参考已重算一致；PC1 继续审查模型/scale/RoPE 与最终运行记录，并确定数值接受标准。旧 v5 golden 不直接用于新 NPU 输入。
 3. **单层实板：**前置能力审核通过，在独占窗口执行 RESET + 30 TEST + 8 ATTENTION；对拍 39 对原始帧。配置仍为 B/MAX_T64/SCORE_SHIFT3。
 4. **同进程真实接线：**NPU QKV→FPGA→O projection→层输出；证明没有软件 Attention 替代或 fallback。
 5. **30 层 B：**先少量 token，再扩大到编译容量内的上下文；审核逐层误差、历史状态、生成与质量。合成 30 层隔离通过不能替代此项。
@@ -159,6 +161,8 @@ v5 已有真实模型输入，继续作为已通过基准。新 NPU 数据因 W8
 | 材料 | 路径 / 用途 |
 |---|---|
 | CPU/HF v5 输入 | `E:\KVmix\pc1_real_attention_handoff_20261016_v5\pc_20261016_real_attention_complete_v5` |
+| 新 NPU v40 输入与离线参考 | `E:\KVmix\npu_capture_v40_offline_handoff_20261018(1).zip`；详见[v40 专项审查](NPU_V40_CAPTURE_REVIEW_20261018.md) |
+| 新 NPU v40 独立审计 | `E:\KVmix\npu_capture_v40_audit_20261018.json`（本地，未上传） |
 | 真实模型单层实板回传 | `E:\KVmix\fpga_real_attention_return_20261016.zip` |
 | 隔离及非空 RESET 实板回传 | `E:\KVmix\fpga_isolation_return_20261016.zip` |
 | 真实输入独立审计 | `E:\KVmix\fpga_real_attention_return_audit_20261016_v2.json` |
