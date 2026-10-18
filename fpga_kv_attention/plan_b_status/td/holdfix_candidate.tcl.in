@@ -1,0 +1,11 @@
+import_device ph1_90.db -package PH1A90SEG324 -speed 2
+open_project {@BUILD_ROOT@/attention_ddr.prj} -noanalyze
+import_db {@BUILD_ROOT@/attention_final.db}
+fix_hold
+update_timing -mode final
+report_area -io_info -file {@BUILD_ROOT@/attention_holdfix.area}
+report_timing_summary -file {@BUILD_ROOT@/attention_holdfix.timing}
+check_timing -verbose -file {@BUILD_ROOT@/attention_holdfix_check.timing}
+export_db {@BUILD_ROOT@/attention_holdfix.db}
+bitgen -bit {@BUILD_ROOT@/attention_holdfix.bit}
+exit
