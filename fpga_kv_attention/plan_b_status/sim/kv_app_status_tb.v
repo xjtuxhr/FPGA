@@ -3,10 +3,11 @@ module kv_app_status_tb;
     reg clk = 0;
     always #5 clk = ~clk;
     reg rst_n = 0, wr_pulse = 0;
-    reg [7:0] wr_addr = 0, rd_addr = 8'hA4;
+    reg [31:0] wr_addr = 32'h0008_00A8, rd_addr = 32'h0008_00A4;
     reg [31:0] wr_data = 0;
     reg [3:0] wr_strb = 0;
     wire [31:0] rd_data;
+    wire rd_hit;
     reg ddr_ready = 0, bridge_ready = 0, endpoint_idle = 1;
     reg engine_busy = 0, endpoint_fault = 0;
     reg [3:0] endpoint_error = 0;
@@ -16,7 +17,8 @@ module kv_app_status_tb;
     kv_app_status #(.RESET_CYCLES(8'd4)) dut (
         .clk(clk), .rst_n(rst_n), .wr_pulse(wr_pulse), .wr_addr(wr_addr),
         .wr_data(wr_data), .wr_strb(wr_strb), .rd_addr(rd_addr),
-        .rd_data(rd_data), .ddr_ready(ddr_ready), .bridge_ready(bridge_ready),
+        .rd_data(rd_data), .rd_hit(rd_hit), .ddr_ready(ddr_ready),
+        .bridge_ready(bridge_ready),
         .endpoint_idle(endpoint_idle), .engine_busy(engine_busy),
         .endpoint_fault(endpoint_fault), .endpoint_error(endpoint_error),
         .h2c_accepted(h2c_accepted), .response_accepted(response_accepted),
@@ -37,7 +39,7 @@ module kv_app_status_tb;
         input [3:0] strb;
         begin
             @(negedge clk);
-            wr_addr = 8'hA8; wr_data = data; wr_strb = strb; wr_pulse = 1;
+            wr_data = data; wr_strb = strb; wr_pulse = 1;
             step();
             @(negedge clk); wr_pulse = 0;
         end
@@ -47,6 +49,13 @@ module kv_app_status_tb;
         check(32'h0);
         ddr_ready = 1; bridge_ready = 1; step();
         check(32'h10); // READY
+        if (rd_hit !== 1'b1) begin $display("FAIL user BAR read decode"); errors=errors+1; end
+        wr_addr = 32'h0001_00A8; command(32'd1, 4'hF);
+        check(32'h10); // unrelated BAR offset must not reset
+        wr_addr = 32'h0000_00A8; command(32'd1, 4'hF);
+        check(32'h40); // local-address form resets
+        repeat (6) step(); check(32'h10);
+        wr_addr = 32'h0008_00A8;
         response_accepted = 1; step(); response_accepted = 0;
         check(32'h11); // DONE sticks until next H2C
         h2c_accepted = 1; step(); h2c_accepted = 0;
@@ -73,7 +82,15 @@ module kv_app_status_tb;
         check(32'h10);
         ddr_ready = 0; step();
         check(32'h2E); // DDR loss after ready is sticky
-        rd_addr = 8'hA8; #1;
+        rd_addr = 32'h0000_00A4; #1;
+        if (rd_hit !== 1'b1 || rd_data !== 32'h2E) begin
+            $display("FAIL local BAR read decode"); errors=errors+1;
+        end
+        rd_addr = 32'h0001_00A4; #1;
+        if (rd_hit !== 1'b0 || rd_data !== 0) begin
+            $display("FAIL unrelated BAR read decode"); errors=errors+1;
+        end
+        rd_addr = 32'h0008_00A8; #1;
         if (rd_data !== 0) begin $display("FAIL CONTROL readback"); errors=errors+1; end
         if (errors == 0) $display("kv_app_status: ALL checks PASSED");
         else $display("kv_app_status: %0d checks FAILED", errors);

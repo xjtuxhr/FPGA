@@ -7,11 +7,12 @@ module kv_app_status #(
 )(
     input wire clk, rst_n,
     input wire wr_pulse,
-    input wire [7:0] wr_addr,
+    input wire [31:0] wr_addr,
     input wire [31:0] wr_data,
     input wire [3:0] wr_strb,
-    input wire [7:0] rd_addr,
+    input wire [31:0] rd_addr,
     output reg [31:0] rd_data,
+    output wire rd_hit,
     input wire ddr_ready,
     input wire bridge_ready,
     input wire endpoint_idle,
@@ -23,11 +24,19 @@ module kv_app_status #(
     output wire soft_reset_active
 );
     localparam [7:0] REG_STATUS = 8'hA4, REG_CONTROL = 8'hA8;
+    // Some SGDMA integrations forward BAR0+0x80000 while others present
+    // the user-window-relative address. Accept only these two windows.
+    wire wr_window = wr_addr[31:8] == 24'h000000 ||
+                     wr_addr[31:8] == 24'h000800;
+    wire rd_window = rd_addr[31:8] == 24'h000000 ||
+                     rd_addr[31:8] == 24'h000800;
+    assign rd_hit = rd_window &&
+                    (rd_addr[7:0] == REG_STATUS || rd_addr[7:0] == REG_CONTROL);
     localparam [2:0] ERR_DDR_OR_CONTROL = 3'd7;
     reg [7:0] reset_left;
     reg seen_ddr, sticky_fault, sticky_done;
     reg [2:0] sticky_error;
-    wire ctrl_write = wr_pulse && wr_addr == REG_CONTROL;
+    wire ctrl_write = wr_pulse && wr_window && wr_addr[7:0] == REG_CONTROL;
     wire ctrl_reset = ctrl_write && wr_strb == 4'hF && wr_data == 32'd1;
     wire ctrl_abort = ctrl_write && wr_strb == 4'hF && wr_data == 32'd2;
     wire ctrl_bad = ctrl_write && !ctrl_reset && !ctrl_abort;
@@ -84,7 +93,7 @@ module kv_app_status #(
 
     // The top-level vendor BAR mux registers this value on a read request.
     always @(*) begin
-        case (rd_addr)
+        case (rd_hit ? rd_addr[7:0] : 8'h00)
             REG_STATUS: rd_data = {25'd0, busy, sticky_fault,
                                    ready, sticky_error, sticky_done};
             REG_CONTROL: rd_data = 32'd0;

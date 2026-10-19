@@ -1,6 +1,6 @@
-# Plan B 应用状态寄存器候选版（待 PC2/B 定稿）
+# Plan B 应用状态寄存器与软复位
 
-本目录在已冻结的 `functional_b64s3` B 模式（`MAX_T=64`、`SCORE_SHIFT=3`）上增加 BAR 状态和端点软复位。基准功能 bit 不变；这里的代码及新 TD 工程是候选版，尚无新 bit、烧录或实板恢复证据。
+本目录在已冻结的 `functional_b64s3` B 模式（`MAX_T=64`、`SCORE_SHIFT=3`）上增加 BAR 状态和端点软复位。2026-10-19 已从冻结输入重新综合、布局布线并生成新 bit；用户报告该文件已通过 JTAG 下载成功。BAR 读写、PCIe 恢复及软复位仍需 PC2 实板验证，接口语义仍是候选。
 
 PC1 补交的 `pc1_host_bridge_source_snapshot_20261018.zip` SHA256 为 `061FF484B9A955639FD0B9F1F3597CECBF1AE41433B51ED9D66007124903495C`；快照内 73 个文件与 manifest 哈希全部匹配。其 host bridge 拥有 v2 framing/seq，PC2 DeviceOps 拥有 SGDMA；正式插件仍要求 `deadline_enforced=true`，本次快照和 PC2 当前 adapter 均未证明此能力。该快照不是 BAR 映射定稿，也没有板端测试结果。
 
@@ -9,6 +9,8 @@ PC1 的 `Pc2SgdmaBridge.exchange()` 实际调用次序为 `device.write(request)
 ## 候选寄存器
 
 PC2 提议通过 `/dev/ANLOGIC-PCI0_user` 对 BAR0 作对齐 4B 的 `pread/pwrite`，逻辑偏移如下；AXI-L 读不清零。
+
+本工程的 Linux 驱动把 user 节点偏移加到 BAR0 `0x80000`，所以逻辑 `0xA4/0xA8` 对应原始 BAR0 `0x800A4/0x800A8`。由于加密 SGDMA IP 向 `m_axil_*addr` 呈现的地址形式尚未经实板证实，当前 RTL 仅接受两种完整地址：`0x000000A4/0x000000A8` 或 `0x000800A4/0x000800A8`；其他高位窗口不命中。板测应核实实际形式，不可仅凭驱动源码推断 IP 内部行为。
 
 | 偏移 | 方向 | 字段/写值 | 当前候选语义 |
 |---|---|---|---|
@@ -36,6 +38,16 @@ DDR 上电后若从未校准成功，这版只报告 `READY=0`，不会凭等待
 
 `sim/kv_app_status_tb.v` 已覆盖上电、READY、DONE、忙时拒绝复位、端点错误、非法 CONTROL、SESSION_ABORT 候选和 DDR ready 丢失；`sim/planb_soft_reset_cdc_tb.v` 已覆盖旧 ACK 在 C2H FIFO 中时的软复位冲刷、坏 CRC 后的故障恢复，以及新 RESET 的单帧 ACK/seq/DONE。冻结版 RESET CDC 62 个向量在新 wrapper（soft_reset 绑 0）下全部通过。以上仅为离线仿真，不是 TD 时序签核或板上证明。
 
-2026-10-18 的**候选工程离线构建**位于 `E:/KVmix/fpga_attention_ddr_planb_candidate_v2_20261018`。TD 6.2.200067 联合综合、布局布线和 bitgen 完成；先前常规 `route` 后 hold WNS 为 −0.015 ns，追加 TD 官方 `fix_hold` 命令后最终 routed 报告为 setup WNS **+0.442 ns**、hold WNS **+0.020 ns**、两者 TNS 0，STA coverage 99.20%；资源为 LUT6 22088、slice 27036、ERAM 98/272、DSP 4/240。候选 `attention_holdfix.bit` SHA256 为 `531DE07D8ACAE24E9C01D81873EDAC9E4348E0C217CD203184B16F2475B380C5`。**没有烧录或板测**；旧功能 bit 仍是已知实板基线。
+2026-10-18 的**历史候选工程**位于 `E:/KVmix/fpga_attention_ddr_planb_candidate_v2_20261018`。该工程曾完成常规综合、布局布线，但最后的 `attention_holdfix.bit` 是从已布线的 `attention_final.db` 导入后追加 `fix_hold` 再生成，并非从头重新布局布线。其 SHA256 为 `531DE07D8ACAE24E9C01D81873EDAC9E4348E0C217CD203184B16F2475B380C5`；该文件未烧录或板测。
 
-该次 TD 构建曾对新文件的 `CompileOrder` 与一个原文件重复发出警告；已把 `assemble.py` 的新文件顺序改为唯一的 205，并验证由它重建的五个关键 RTL/接线文件与该次构建逐字节相同。新脚本和 `td/holdfix_candidate.tcl.in` 为后续无顺序冲突的重建入口；不应假定重新构建的 bit SHA 会相同。时序检查仍报告原相机/PCIe 工程中的 PLL 频率提示、未约束旧摄像头路径等问题，需单独复核；上述正裕量不能代替板级功能、跨进程恢复或硬 deadline 证据。
+该次 TD 构建曾对新文件的 `CompileOrder` 与一个原文件重复发出警告；已把 `assemble.py` 的新文件顺序改为唯一的 205。`td/holdfix_candidate.tcl.in` 保留供历史复核，新的 `td/physical_clean.tcl.in` 从本次新综合的 gate DB 开始执行 `place`、`route`、`fix_hold`、`bitgen`。
+
+### 2026-10-19 完整重建及下载记录
+
+- 工程：`E:/KVmix/fpga_attention_ddr_planb_full_20261019`。冻结基线的 154 个 TD 输入经组装脚本逐字节校验后，叠加本目录 RTL、TOP/SGDMA 接线与 TD 文件清单。
+- 综合日志：`td_20261019_212614.log`，输出 `attention_gate.db`；报告包含 `u_kv_app_status`。物理日志：`td_20261019_213350.log`，仅导入本工程新 `attention_gate.db`，随后执行 `place`、`route`、`fix_hold` 和 `bitgen`；没有导入旧 `attention_final.db`。
+- bit：`attention_planb_full.bit`，4,850,323 字节，SHA256 `A9560E762C5C2DBF89CB4C10346CA8C2A849FB2DA7CFE4D4DF7F93A4A5AB2887`。用户报告 JTAG 下载成功且文件名核对正确；暂无 TD 下载日志/截图及板端读回证据。
+- 最终 routed 时序：setup WNS +0.306 ns、hold WNS +0.020 ns，均 TNS 0；STA coverage 99.20%。资源：LUT6 22,155/64,320，slice 27,171/64,320，ERAM 98/272，DSP 4/240。TD `check_timing` 仍报告 6 处无时钟、2 处 PLL/时钟约束、34 个无输入延迟、55 个无输出延迟等问题；这些正裕量不是完整时序签核。
+- 离线仿真通过：`kv_app_status`、`planb_soft_reset_cdc`、冻结版 RESET CDC 62 个向量。BAR 解码覆盖本地与原始 BAR0 两种地址，并拒绝其他高位窗口。
+
+下一步由 PC2 在独占窗口恢复 PCIe 链路，记录 `/dev/ANLOGIC-PCI0_user` 的 STATUS 读值，再依次验证 READY、RESET/OP_TEST、空闲时 SOFT_RESET 后重新 READY，以及故障/忙时负例。`deadline_enforced` 保持 false，单次 recovery 只运行一个 H2C 进程。详见 [`PC2_BUILD_RESPONSE_20261019.md`](PC2_BUILD_RESPONSE_20261019.md)。

@@ -1,0 +1,18 @@
+# P&R starts only from the gate DB produced by synth_functional.tcl in
+# this same fresh build directory. Do not import a previous routed DB.
+import_device ph1_90.db -package PH1A90SEG324 -speed 2
+open_project {@BUILD_ROOT@/attention_ddr.prj} -noanalyze
+import_db {@BUILD_ROOT@/attention_gate.db}
+set_param route fix_hold high
+place
+update_timing -mode manhattan
+report_timing_summary -file {@BUILD_ROOT@/attention_place.timing}
+route
+fix_hold
+update_timing -mode final
+report_area -io_info -file {@BUILD_ROOT@/attention_planb_full.area}
+report_timing_summary -file {@BUILD_ROOT@/attention_planb_full.timing}
+check_timing -verbose -file {@BUILD_ROOT@/attention_planb_full_check.timing}
+export_db {@BUILD_ROOT@/attention_planb_full.db}
+bitgen -bit {@BUILD_ROOT@/attention_planb_full.bit}
+exit

@@ -20,8 +20,9 @@ module planb_soft_reset_cdc_tb;
     wire [3:0] ep_error;
     kv_app_status #(.RESET_CYCLES(8'd8)) u_status (
         .clk(usr_clk), .rst_n(usr_rst_n), .wr_pulse(wr_pulse),
-        .wr_addr(8'hA8), .wr_data(wr_data), .wr_strb(4'hF),
-        .rd_addr(8'hA4), .rd_data(status), .ddr_ready(ddr_ok_u),
+        .wr_addr(32'h0008_00A8), .wr_data(wr_data), .wr_strb(4'hF),
+        .rd_addr(32'h0008_00A4), .rd_data(status), .rd_hit(),
+        .ddr_ready(ddr_ok_u),
         .bridge_ready(bridge_u), .endpoint_idle(idle_u),
         .engine_busy(busy_u), .endpoint_fault(fault_u),
         .endpoint_error(err_u), .h2c_accepted(h_accepted),

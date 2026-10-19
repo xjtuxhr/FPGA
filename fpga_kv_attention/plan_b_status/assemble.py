@@ -67,12 +67,14 @@ def modify_top(text: str) -> str:
         "    wire [3:0] app_usr_error_code;\n"
         "    wire app_usr_h2c_accepted, app_usr_response_accepted;\n"
         "    wire [31:0] app_status_rdata;\n"
+        "    wire app_status_rd_hit;\n"
         "    kv_app_status u_kv_app_status (\n"
         "        .clk(user_clk), .rst_n(user_rst_n),\n"
-        "        .wr_pulse(wr_pulse && m_axil_awaddr[31:8] == 24'd0),\n"
-        "        .wr_addr(m_axil_awaddr[7:0]), .wr_data(m_axil_wdata),\n"
-        "        .wr_strb(m_axil_wstrb), .rd_addr(m_axil_araddr[7:0]),\n"
-        "        .rd_data(app_status_rdata), .ddr_ready(app_usr_ddr_ready),\n"
+        "        .wr_pulse(wr_pulse),\n"
+        "        .wr_addr(m_axil_awaddr), .wr_data(m_axil_wdata),\n"
+        "        .wr_strb(m_axil_wstrb), .rd_addr(m_axil_araddr),\n"
+        "        .rd_data(app_status_rdata), .rd_hit(app_status_rd_hit),\n"
+        "        .ddr_ready(app_usr_ddr_ready),\n"
         "        .bridge_ready(app_usr_bridge_ready),\n"
         "        .endpoint_idle(app_usr_endpoint_idle),\n"
         "        .engine_busy(app_usr_engine_busy), .endpoint_fault(app_usr_fault),\n"
@@ -82,10 +84,8 @@ def modify_top(text: str) -> str:
         "        .soft_reset_active(app_soft_reset));", "top BAR write intercept")
     text = replace_one(text,
         "                             (m_axil_araddr[7:0] <= 8'hA0);",
-        "                             ((m_axil_araddr[7:0] <= 8'hA0) ||\n"
-        "                              ((m_axil_araddr[31:8] == 24'd0) &&\n"
-        "                               (m_axil_araddr[7:0] == 8'hA4 ||\n"
-        "                                m_axil_araddr[7:0] == 8'hA8)));",
+        "                             (m_axil_araddr[7:0] <= 8'hA0 ||\n"
+        "                              app_status_rd_hit);",
         "top BAR read intercept")
     text = replace_one(text,
         "            default:              vid_reg_rdata_d1 <= 32'd0;",
@@ -137,9 +137,10 @@ def main() -> None:
     write_modified(root / "uisrc/03_ip/sgdma/sgdma_app/src/sgdma_app.v", modify_app)
     for rel in ("attention_ddr.al", "attention_ddr.prj", "build/syn_1/attention_ddr.prj"):
         write_modified(root / rel, add_td_file)
-    template = (HERE / "td" / "holdfix_candidate.tcl.in").read_text(encoding="utf-8")
-    (root / "holdfix_candidate.tcl").write_text(
-        template.replace("@BUILD_ROOT@", root.as_posix()), encoding="utf-8")
+    for name in ("holdfix_candidate.tcl", "physical_clean.tcl"):
+        template = (HERE / "td" / f"{name}.in").read_text(encoding="utf-8")
+        (root / name).write_text(
+            template.replace("@BUILD_ROOT@", root.as_posix()), encoding="utf-8")
     print(f"PASS: candidate Plan B TD project assembled at {root}")
 
 
