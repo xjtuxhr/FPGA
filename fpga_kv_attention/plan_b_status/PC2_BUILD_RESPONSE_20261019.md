@@ -20,9 +20,9 @@
 
 ## 请 PC2 在独占窗口记录的实板检查
 
-1. 在用户确认 JTAG 下载结束后，按 PC2 已验证的板端路径运行 `pcie1-recover.sh`，保存执行输出、PCIe 枚举及四个设备节点。B 当前电脑对已知 RK 地址的 SSH 均超时，不能代替 PC2 声称已恢复。
+1. 在用户确认 JTAG 下载结束后，由 PC1 从 RK 的 **root 串口/控制台**执行 `/usr/local/sbin/pcie1-recover.sh`，保存执行输出；PC2 随后检查 PCIe 枚举及四个设备节点。既有恢复决定指出 `kvdev` 无 sudo 权限。B 当前电脑对两条已知 RK SSH 地址均超时，不能代替团队声称已恢复。
 2. 对 `/dev/ANLOGIC-PCI0_user` 以 4B 对齐方式读取逻辑偏移 `0xA4`，记录原始 32-bit 数值。正常 DDR/桥/端点空闲时预期 READY bit4=1；若为 0，按位区分 BUSY/FAULT/ERR，不要立即写 H2C。读 `0xA8` 应返回 0。这里的逻辑偏移由驱动加上 user 基址 `0x80000`。
-3. 若 READY=1，先单次 RESET 与 OP_TEST，再做空闲时 CONTROL `0xA8` 写 `0x00000001`（SOFT_RESET），观察 READY 重新出现及 RESET/OP_TEST 可重入。保存每次 STATUS 与 C2H 帧结果。DONE bit0 只是 FPGA 交出最后一个 C2H beat 的标记，不代表 Linux 读取完成。
+3. 若 READY=1，在**一个** H2C 进程内完成单次 RESET、OP_TEST 和空闲时 CONTROL `0xA8` 写 `0x00000001`（SOFT_RESET）的检查，记录 READY 是否重新出现及 RESET/OP_TEST 能否重入，保存每次 STATUS 与 C2H 帧结果。若现有工具必须启用第二个 H2C 进程，先由 PC1 再执行一次恢复。DONE bit0 只是 FPGA 交出最后一个 C2H beat 的标记，不代表 Linux 读取完成。
 4. 在负例测试之前，按团队约定保持一次 recovery 只运行一个 H2C 进程；`deadline_enforced=false`。`SESSION_ABORT`/ERR=7 语义还未冻结，请先与 B 对齐再测。不要把写后 `wait_ready()` 当成 H2C 写前 READY 门控。
 
 本文件记录“用户报告 JTAG 下载成功”，并不冒充自动读回或板端功能通过。请回传 PCIe 恢复日志、`0xA4` 原始读值和第一轮 RESET/OP_TEST 结果，以确认新 bit 与 BAR 地址路径。
