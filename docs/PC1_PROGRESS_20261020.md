@@ -51,9 +51,10 @@ PC2 提供的 `KVmix_quality_gate_20261020.md`（本地文件 SHA256 `4666D95D7E
 | position 0 的 `Once` 后 top-1 为 `):`，目标 ` upon` 的 NLL 高 | 板端和 PC 候选均如此；“目标 token 应当是 top-1”并非语言模型的正确性判据。候选/板端明确用 `add_bos=false`；本地 config 的 `bos_token_id=0` **不证明**训练时每段都自动加 BOS，也不证明此处异常由缺 BOS 引起。 | 在 PC 用相同 checkpoint/tokenizer 生成 HF float 的无 BOS 与显式 BOS 两套 logits，记录同一目标的 rank/NLL；必要时先修参考评测的输入约定。 | “板上显式 BOS 后也改善”以及改善幅度，须跑新的、有新 seq 的 B 会话。 |
 | 板端与 PC 候选 logits 不相同 | v44 21/21 同前缀可比，20/21 top-1 相同，全词表最大差 6.5310；第二 prompt position0 甚至 top-1 不同。候选是 CPU F32 Attention，板端是定点 FPGA Attention，故“不 bit-exact”本身不能定位为故障。 | 用已有 v44 的逐位置 logits 和板上保存的 `wire/`、checkpoint（只读取回，无须重跑）做首处分歧分层归因；先明确容差与同数值路径 oracle。 | 若已存证据不足以重建对应层输入/输出，才需一次受控层级捕获；修正 RTL 后的真实效果仍须上板。 |
 | 缺 HF float 参考，正式质量门未闭合 | 真实存在：本地已有 Smol135M checkpoint，但当前 PC Python 未装 torch/transformers/safetensors；既有 HF 资料只覆盖第0层局部张量，没有本次完整 logits。 | 在隔离的 PC 环境生成同 checkpoint、同 token/BOS 规则的 HF float logits，再离线比较 board/候选；无需 RK 或 FPGA。 | 若要声明**修正后的板端**达到 HF 容差，仍须对修正版本采集板端 logits；正式数据集 PPL/B/U/M 还需独立实验。 |
+| JTAG 重配置后的 PCIe“假在线”与首次 H2C 超时 | PC2 报告 BAR 读全 `0xffffffff`、资源未重新分配；执行完整 PCIe/驱动恢复后，后续实验通过。这是一次**成员报告的真实故障**，但原始 dmesg/config 日志未随本次 v44 数值包取回。 | 离线明确恢复状态机、停止后续层和单人操作 SOP；不能把普通 Python timeout 或自动重试当恢复。 | 恢复脚本是否安全、重烧后是否稳定自动恢复及驱动状态，必须在批准的独占板卡窗口验证；涉及 rebind/驱动等系统操作，PC1 不自行执行。 |
 | “新 bit”的身份 | PC2 报告把其 v43 bit 声明为 `c510…`；本次 v44 声明 Plan B full bit 为 `a956…`。两次不能写成同一个 bit 的重复实验；都没有配置后独立读回哈希。 | 用各自 JTAG 下载记录、bit 文件哈希和工程版本澄清历史标签，不需再运行模型。 | 要证明 FPGA **实际配置内容**，需要设备/下载链可提供的独立配置证据；软件传入的哈希不是读回。 |
 
-PC2 报告中的“缺 BOS 最可能”“两条路径同错所以不是 FPGA 问题”“加 BOS 后 NLL 会恢复”均是**待检验假设**，不能升级为根因。已确认的质量缺口是缺同输入的 HF 浮点基线与生产容差，而非已证实的 BOS/RTL bug。
+PC2 报告中的“缺 BOS 最可能”“两条路径同错所以不是 FPGA 问题”“加 BOS 后 NLL 会恢复”均是**待检验假设**，不能升级为根因。已确认的质量缺口是缺同输入的 HF 浮点基线与生产容差，而非已证实的 BOS/RTL bug。其 v43 后台运行曾被 logind 以 SIGTERM 结束：该次不是模型 PASS/FAIL；v44 已改用串口前台执行，长期无人值守运行方式仍需另行设计。
 
 ## 目前可以继续做什么
 
