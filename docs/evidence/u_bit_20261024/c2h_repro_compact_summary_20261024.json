@@ -1,0 +1,47 @@
+{
+  "real_date_utc": "2026-10-24",
+  "purpose": "bounded C2H-timeout reproducer with first-failure diagnostics",
+  "run_3pass": {
+    "summary": "/home/kvdev/pcie_bringup_20261024/c2h_repro_20261024/summary.json",
+    "status": "NO_C2H_TIMEOUT_DURING_3_PASSES",
+    "passes": 3,
+    "positions_per_pass": 256,
+    "frames": 768,
+    "all_t2_golden_match": true,
+    "concat_output_sha256": "045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976",
+    "diagnostics_dir": null
+  },
+  "run_10pass_cpu_stress": {
+    "summary": "/home/kvdev/pcie_bringup_20261024/c2h_repro_20261024_stress/summary.json",
+    "status": "NO_C2H_TIMEOUT_DURING_10_PASSES",
+    "passes": 10,
+    "positions_per_pass": 256,
+    "frames": 2560,
+    "background_load": "8 x yes > /dev/null",
+    "all_t2_golden_match": true,
+    "concat_output_sha256": "045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976",
+    "diagnostics_dir": null
+  },
+  "total_frames_without_c2h_timeout": 3328,
+  "c2h_timeout_observed": false,
+  "earlier_one_off": {
+    "when": "2026-10-24, during interleaved B-reference 256-position diagnostic pass",
+    "driver_log": "Polling timeout; desc_wb=0 expected=2; 0-C2H0-ST xfer 1184 timed out; completed_desc_count=2; engine idle; abort",
+    "endpoint_status": "0x11 READY/DONE, no FAULT",
+    "reproduced": false
+  },
+  "harness": {
+    "script": "/home/kvdev/pcie_bringup_20261024/scripts/c2h_repro_diag.py",
+    "on_first_failure_saves": [
+      "dmesg full/filtered",
+      "BAR0 STATUS/VERSION/CONTROL and known registers",
+      "PCIe link speed/width and sysfs",
+      "anlogic_pci module parameters",
+      "transport state/next_seq/active frame",
+      "last rows and diagnostic.json"
+    ],
+    "auto_retry": false,
+    "auto_recovery": false
+  },
+  "conclusion": "The earlier C2H poll-mode timeout did not reproduce in 3328 frames, including 2560 frames under 8x CPU load. Treat it as a one-off until a new occurrence is captured; the diagnostic harness is ready."
+}

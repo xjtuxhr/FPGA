@@ -20,7 +20,7 @@
 | U golden：真实 NPU layer0 pos0..7 | **PASS**：8 帧连续对拍，逐位一致，0 mismatch |
 | U golden：T2 合成 256 位置 | **PASS**：256/256 逐位一致，concat SHA 相同 |
 | U vs B/float 数值诊断 | 差异随 context 增大而下降，未发散；不是 golden |
-| C2H 首次超时诊断 | 8 帧 golden 运行未触发；harness 已就位，首次超时即落盘 |
+| C2H 首次超时诊断 | 8 帧 golden + 3×256 + 10×256（含 8×CPU 负载）共 3328 帧均未触发；harness 就位 |
 | PPL / HF parity / 质量 | **NOT RUN**：需 PC1 的 HF/PPL 环境 |
 | B/U/M 同条件对比 | **NOT RUN**：需重新烧 B/M bit |
 
@@ -274,6 +274,12 @@ abort transfer ...
 - 判断：host/driver `poll_mode=1` 的 C2H 完成通知偶发丢失，与 U bit 的 Attention 数值无关；需 PC2 继续跟踪（现有 H2C deadline 文档未覆盖 C2H 完成丢失）。
 - 该失败运行的 `summary.json` 保留在 `u_attention_ctx256_metrics_20261024/`，**不要**把其中的部分结果当作 Gate；长上下文数据以 `u_attention_ctx256_outputs_20261024/` 的干净三次一致结果为准。
 - 2026-10-24 的真实 NPU 8 帧 golden 对拍**没有**触发 C2H 超时；`u_npu_golden_8frame_20261024/` 下没有 `diag_first_c2h_timeout/`。该 runner 的诊断路径已保留，下一次首次超时会自动落盘。
+- 随后做了两轮复现尝试：
+  - `c2h_repro_20261024`：3 遍 × 256 位置，共 768 帧；
+  - `c2h_repro_20261024_stress`：10 遍 × 256 位置，共 2560 帧，后台 8×`yes` CPU 负载；
+  - 全部 T2 256 golden 逐位一致，`concat=045d90a0...`；**未触发 C2H 超时**，无 `diag_*` 目录。
+- 合计 3328 帧 0 次 C2H 超时。之前那次 10 s C2H poll-mode 完成丢失未复现，暂按一次性 host 事件处理，不能归因于 U bit 或稳定的驱动缺陷；PC2 仍需在下次出现时抓取。
+- 证据：`c2h_repro_20261024/summary.json`、`c2h_repro_20261024_stress/summary.json`、`c2h_repro_compact_summary_20261024.json`；harness `scripts/c2h_repro_diag.py`。
 
 ## 8. 证据清单
 
@@ -295,7 +301,10 @@ abort transfer ...
 | `pc_20261024_u_t2_256_golden.json` | PC1 交付的 T2 256 U golden |
 | `u_npu_golden_8frame_20261024/` | 8 帧真实 NPU golden 对拍：summary + 每帧 request/response/golden |
 | `u_attention_ctx256_outputs_20261024/u_t2_256_golden_compare.json` | T2 256 golden 256/256 对拍结果 |
-| `scripts/` | 本次使用的探针脚本（ctx256、8-frame golden、metrics、v44 probe 等） |
+| `c2h_repro_20261024/` | 3 遍 × 256 位置 C2H 复现尝试（768 帧，未触发） |
+| `c2h_repro_20261024_stress/` | 10 遍 × 256 + 8×CPU 负载（2560 帧，未触发） |
+| `c2h_repro_compact_summary_20261024.json` | 两轮复现的紧凑汇总 |
+| `scripts/` | 本次使用的探针脚本（ctx256、8-frame golden、C2H repro、metrics、v44 probe 等） |
 
 GitHub 副本：`docs/evidence/u_bit_20261024/`（探针脚本 + 8 帧 summary + T2 256 对拍结果）。PC1 的 golden binary 和板上原始逐帧数据未全部上传；golden 的 manifest/hash 以本文和板上目录为准。
 
@@ -304,7 +313,7 @@ GitHub 副本：`docs/evidence/u_bit_20261024/`（探针脚本 + 8 帧 summary +
 1. **U golden 覆盖范围**：真实 NPU layer0 pos0..7 和 T2 256 已 **PASS**；尚未覆盖 30 层逐层、其他 prompt、HF float logits 或数据集 PPL。需要 PC1 继续交付对应 golden。
 2. **PPL / HF parity / 质量**：需 PC1 的 HF/PPL 环境；v44 明确 `quality_gate_passed=false`、`hf_parity_passed=false`。
 3. **B/U/M 同条件对比**：需要重新烧 B/M bit；当前板上是 U bit，旧 B 结论不能沿用。
-4. **C2H poll-mode 完成丢失**：PC2 需复核；8 帧 golden 对拍未触发，未定位根因；首次超时诊断 harness 已就位。
+4. **C2H poll-mode 完成丢失**：PC2 需复核；8 帧 golden + 3×256 + 10×256（含 CPU 负载）共 3328 帧未复现，未定位根因；首次超时诊断 harness 已就位。
 5. **生产数值格式/延迟**：本次是 v2 FP16 测试 profile；不代表生产 dtype、scale、PCIe packet 或端到端性能。
 6. **bit 身份**：文件 SHA 由 B 提供，板端只能读 `VERSION=0x504C4231`；`VERSION` 不能唯一区分 bit。
 7. **时间**：板钟错误约 6 个月，所有板端 `generated_utc`/mtime 不可用。
@@ -356,6 +365,12 @@ T2 256 U golden 对拍（使用已保存的 256 个输出）：
 
 ```sh
 python3 /home/kvdev/pcie_bringup_20261024/scripts/compare_t2_256.py
+```
+
+C2H 复现（3 遍 × 256；脚本内 `OUT`/`START` 固定，复测需改 `OUT` 和递增的 `START`）：
+
+```sh
+python3 /home/kvdev/pcie_bringup_20261024/scripts/c2h_repro_diag.py
 ```
 
 合成 Attention 探针脚本见 `scripts/`；每次都从 RESET 开始，seq 必须大于之前所有已尝试 seq。
