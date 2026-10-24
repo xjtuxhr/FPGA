@@ -1,0 +1,23 @@
+{
+  "schema": "pc1.um_policy_candidate.v1",
+  "status": "BRINGUP_CANDIDATE_NOT_FROZEN_NOT_QUALITY_VALIDATED",
+  "model": "HuggingFaceTB/SmolLM-135M",
+  "model_sha256": {
+    "config.json": "a1fe6f43e20f7a6c6dbc6380222af9526b5cef262446391a281c038249e3e3b7",
+    "model.safetensors": "c7a387d6fe81ca6dd304aeb809bda3932ff1bbef3ca41c9484502f2f448dc093",
+    "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c"
+  },
+  "fixed_input_tar_sha256": "a587026ad0e6c51f16151728771849017fd671fec758a93160b2ec4904cf2d0f",
+  "group_size": 32,
+  "recent_fp16_tokens": 32,
+  "important_k_layers": [14, 18, 26],
+  "important_v_layers": [14, 22, 23],
+  "selection": {
+    "method": "Independent PC Q8.8 fixed-input Attention marginal relative-MSE gain from K3 or V4 versus K2/V2 at seven positions, with R32 in every layer",
+    "source": "host/results/pc_20261021_um_attention_sensitivity.json",
+    "k_ranked_top3": [18, 14, 26],
+    "v_ranked_top3": [14, 23, 22],
+    "not_a_ppl_or_closed_loop_result": true
+  },
+  "acceptance_boundary": "Usable for first U/M integration bit only. Do not describe as a final KVmix importance policy until end-to-end model quality, current U re-encoding rule, and equal-context B/U/M have been evaluated."
+}

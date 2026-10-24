@@ -1,0 +1,498 @@
+{
+  "status": "BRINGUP_CANDIDATE_NOT_FROZEN_NOT_QUALITY_VALIDATED",
+  "policy_sha256": "65b876bd56d6458a8b416f13719cf4688f1fafad48ab82675ef29a8f9a13173c",
+  "source_policy": "um_bringup_candidate_20261021.json",
+  "T": 256,
+  "modes": {
+    "U": {
+      "layers": [
+        {
+          "layer": 0,
+          "base": 0,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 1,
+          "base": 38912,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 2,
+          "base": 77824,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 3,
+          "base": 116736,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 4,
+          "base": 155648,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 5,
+          "base": 194560,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 6,
+          "base": 233472,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 7,
+          "base": 272384,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 8,
+          "base": 311296,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 9,
+          "base": 350208,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 10,
+          "base": 389120,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 11,
+          "base": 428032,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 12,
+          "base": 466944,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 13,
+          "base": 505856,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 14,
+          "base": 544768,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 15,
+          "base": 583680,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 16,
+          "base": 622592,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 17,
+          "base": 661504,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 18,
+          "base": 700416,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 19,
+          "base": 739328,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 20,
+          "base": 778240,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 21,
+          "base": 817152,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 22,
+          "base": 856064,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 23,
+          "base": 894976,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 24,
+          "base": 933888,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 25,
+          "base": 972800,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 26,
+          "base": 1011712,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 27,
+          "base": 1050624,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 28,
+          "base": 1089536,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        },
+        {
+          "layer": 29,
+          "base": 1128448,
+          "stride": 38912,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 0
+        }
+      ],
+      "total_bytes": 1167360
+    },
+    "M": {
+      "layers": [
+        {
+          "layer": 0,
+          "base": 0,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 1,
+          "base": 63488,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 2,
+          "base": 126976,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 3,
+          "base": 190464,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 4,
+          "base": 253952,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 5,
+          "base": 317440,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 6,
+          "base": 380928,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 7,
+          "base": 444416,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 8,
+          "base": 507904,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 9,
+          "base": 571392,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 10,
+          "base": 634880,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 11,
+          "base": 698368,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 12,
+          "base": 761856,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 13,
+          "base": 825344,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 14,
+          "base": 888832,
+          "stride": 83968,
+          "k_bits": 3,
+          "v_bits": 4,
+          "tail": 32
+        },
+        {
+          "layer": 15,
+          "base": 972800,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 16,
+          "base": 1036288,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 17,
+          "base": 1099776,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 18,
+          "base": 1163264,
+          "stride": 71680,
+          "k_bits": 3,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 19,
+          "base": 1234944,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 20,
+          "base": 1298432,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 21,
+          "base": 1361920,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 22,
+          "base": 1425408,
+          "stride": 75776,
+          "k_bits": 2,
+          "v_bits": 4,
+          "tail": 32
+        },
+        {
+          "layer": 23,
+          "base": 1501184,
+          "stride": 75776,
+          "k_bits": 2,
+          "v_bits": 4,
+          "tail": 32
+        },
+        {
+          "layer": 24,
+          "base": 1576960,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 25,
+          "base": 1640448,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 26,
+          "base": 1703936,
+          "stride": 71680,
+          "k_bits": 3,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 27,
+          "base": 1775616,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 28,
+          "base": 1839104,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        },
+        {
+          "layer": 29,
+          "base": 1902592,
+          "stride": 63488,
+          "k_bits": 2,
+          "v_bits": 2,
+          "tail": 32
+        }
+      ],
+      "total_bytes": 1966080
+    }
+  }
+}

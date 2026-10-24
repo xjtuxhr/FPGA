@@ -1,0 +1,190 @@
+{
+  "real_date_utc": "2026-10-24",
+  "golden_status": "INDEPENDENT_SOFTWARE_GOLDEN_NOT_BOARD_VERIFIED",
+  "policy_status": "BRINGUP_CANDIDATE_NOT_FROZEN_NOT_QUALITY_VALIDATED",
+  "policy_sha256": "65b876bd56d6458a8b416f13719cf4688f1fafad48ab82675ef29a8f9a13173c",
+  "tail_length": 32,
+  "tail_eviction_covered": false,
+  "m_quantization_exercised": false,
+  "max_position": 10,
+  "expected_output_blob_sha256": "1079d16becd9367c931cb69d895c776c5addbdf84bbf2d15b8b8d5e91517addb",
+  "input_blob_sha256": "634beb0cac64aa6f9ae8d917d4c4bb5c964d93818557115ce222fd8560aee394",
+  "frames": 630,
+  "bit_exact": 630,
+  "mismatch_count": 0,
+  "all_bit_exact": true,
+  "input_frame_mismatches": [],
+  "per_request": {
+    "0": {
+      "frames": 330,
+      "bit_exact": 330,
+      "mismatch": 0
+    },
+    "1": {
+      "frames": 300,
+      "bit_exact": 300,
+      "mismatch": 0
+    }
+  },
+  "per_layer": {
+    "0": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "1": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "2": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "3": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "4": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "5": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "6": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "7": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "8": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "9": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "10": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "11": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "12": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "13": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "14": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "15": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "16": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "17": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "18": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "19": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "20": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "21": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "22": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "23": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "24": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "25": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "26": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "27": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "28": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    },
+    "29": {
+      "frames": 21,
+      "bit_exact": 21,
+      "mismatch": 0
+    }
+  },
+  "bit_config_counts": {
+    "2K/2V": 525,
+    "3K/4V": 21,
+    "3K/2V": 42,
+    "2K/4V": 42
+  },
+  "kv_actually_quantized_frames": 0,
+  "mismatches": [],
+  "status": "PASS_M_V44_REAL_NPU_GOLDEN_630"
+}
