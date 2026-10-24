@@ -1,0 +1,95 @@
+{
+  "note": "B reference is the FP16/B candidate; M recent-tail subrange is expected to match it",
+  "rows": [
+    {
+      "position": 0,
+      "m_sha256": "694f0fe8b4936e96ead6f57fa15163404d38ffce2883c6b819a27272a0a8f3de",
+      "b_ref_sha256": "694f0fe8b4936e96ead6f57fa15163404d38ffce2883c6b819a27272a0a8f3de",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005767822265625,
+        "RMSE": 0.0028206189906545263
+      },
+      "B_bit_pos0_sha256": "694f0fe8b4936e96ead6f57fa15163404d38ffce2883c6b819a27272a0a8f3de",
+      "B_ref_vs_B_bit_pos0_bit_exact": true
+    },
+    {
+      "position": 1,
+      "m_sha256": "52a6415ee563a87c52399e1305190e17896a696376cea3a53e9f58acfae2af98",
+      "b_ref_sha256": "52a6415ee563a87c52399e1305190e17896a696376cea3a53e9f58acfae2af98",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005809409856145946,
+        "RMSE": 0.002314186237854802
+      }
+    },
+    {
+      "position": 2,
+      "m_sha256": "8a8bba23fd7e3e31d6ba5992634ead3b26329cb384434278d73a66994aa67dbc",
+      "b_ref_sha256": "8a8bba23fd7e3e31d6ba5992634ead3b26329cb384434278d73a66994aa67dbc",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005491512932527731,
+        "RMSE": 0.0023493046922944006
+      }
+    },
+    {
+      "position": 3,
+      "m_sha256": "311976bd442ffdb6617beaac143e60f6142e6706c1e42c6e05e2545291b7e230",
+      "b_ref_sha256": "311976bd442ffdb6617beaac143e60f6142e6706c1e42c6e05e2545291b7e230",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005775570972286231,
+        "RMSE": 0.002387811132716962
+      }
+    },
+    {
+      "position": 4,
+      "m_sha256": "6c76fcb9afbad3193414ba24d0507090261600d1642096524f03e1aceeec8232",
+      "b_ref_sha256": "6c76fcb9afbad3193414ba24d0507090261600d1642096524f03e1aceeec8232",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005323574583000165,
+        "RMSE": 0.0024709760099619147
+      }
+    },
+    {
+      "position": 5,
+      "m_sha256": "6d4ccf3567117a2702675e39f549f35a5c7f67f57818fedbc9638312ce35f13a",
+      "b_ref_sha256": "6d4ccf3567117a2702675e39f549f35a5c7f67f57818fedbc9638312ce35f13a",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.0051677332074979675,
+        "RMSE": 0.0023245913125725924
+      }
+    },
+    {
+      "position": 6,
+      "m_sha256": "903e6bfa4a0a31d43f0290fb65d1496e6c58defad9ec6ac38df904329161b989",
+      "b_ref_sha256": "903e6bfa4a0a31d43f0290fb65d1496e6c58defad9ec6ac38df904329161b989",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005021333639458114,
+        "RMSE": 0.002432384794135898
+      }
+    },
+    {
+      "position": 7,
+      "m_sha256": "caa87b22d5a91df2ca85372928566262c74824c2d695ba9ce930b079fa3dcb38",
+      "b_ref_sha256": "caa87b22d5a91df2ca85372928566262c74824c2d695ba9ce930b079fa3dcb38",
+      "m_vs_B_ref_bit_exact": true,
+      "m_vs_B_ref_mismatch_bytes": 0,
+      "m_vs_B_float": {
+        "max_abs": 0.005186379758723341,
+        "RMSE": 0.002323495030700712
+      }
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 状态：**U 候选 bit 的功能通路和 layer0 U golden 已通过；PPL/质量、B/U/M 对比尚未完成。**
 
+M 候选 bit 记录：[M_BIT_BOARD_TEST_20261024.md](M_BIT_BOARD_TEST_20261024.md)。
+
 - 真实日期：2026-10-24。板钟错误，板上时间显示 2026-04-27 UTC；本文所有板端时间戳不可作为日期证据。
 - 测试对象：B 通过 JTAG 烧录的 U 候选版 `attention_planb_full.bit`，本地路径 `E:\KVmix\um_td_planb_u_dequantpipe_20261023\attention_planb_full.bit`。
 - bit 文件 SHA256（**B 提供，非板端反读**）：`B5AD8F911EC270E448993D09C1BC243B4420D873870B3B18D39BD46A2958B26B`。

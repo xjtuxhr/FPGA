@@ -1,0 +1,133 @@
+{
+  "bit": "M (B-burned, hash/policy TBD)",
+  "start_seq": 16100,
+  "status": "M_PROBE_DONE",
+  "deterministic": true,
+  "final_reset_seq": 16118,
+  "passes": [
+    {
+      "run": 1,
+      "reset_seq": 16100,
+      "rows": [
+        {
+          "position": 0,
+          "seq": 16101,
+          "output_sha256": "694f0fe8b4936e96ead6f57fa15163404d38ffce2883c6b819a27272a0a8f3de",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": true
+        },
+        {
+          "position": 1,
+          "seq": 16102,
+          "output_sha256": "52a6415ee563a87c52399e1305190e17896a696376cea3a53e9f58acfae2af98",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 2,
+          "seq": 16103,
+          "output_sha256": "8a8bba23fd7e3e31d6ba5992634ead3b26329cb384434278d73a66994aa67dbc",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 3,
+          "seq": 16104,
+          "output_sha256": "311976bd442ffdb6617beaac143e60f6142e6706c1e42c6e05e2545291b7e230",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 4,
+          "seq": 16105,
+          "output_sha256": "6c76fcb9afbad3193414ba24d0507090261600d1642096524f03e1aceeec8232",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 5,
+          "seq": 16106,
+          "output_sha256": "6d4ccf3567117a2702675e39f549f35a5c7f67f57818fedbc9638312ce35f13a",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 6,
+          "seq": 16107,
+          "output_sha256": "903e6bfa4a0a31d43f0290fb65d1496e6c58defad9ec6ac38df904329161b989",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 7,
+          "seq": 16108,
+          "output_sha256": "caa87b22d5a91df2ca85372928566262c74824c2d695ba9ce930b079fa3dcb38",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        }
+      ]
+    },
+    {
+      "run": 2,
+      "reset_seq": 16109,
+      "rows": [
+        {
+          "position": 0,
+          "seq": 16110,
+          "output_sha256": "694f0fe8b4936e96ead6f57fa15163404d38ffce2883c6b819a27272a0a8f3de",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": true
+        },
+        {
+          "position": 1,
+          "seq": 16111,
+          "output_sha256": "52a6415ee563a87c52399e1305190e17896a696376cea3a53e9f58acfae2af98",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 2,
+          "seq": 16112,
+          "output_sha256": "8a8bba23fd7e3e31d6ba5992634ead3b26329cb384434278d73a66994aa67dbc",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 3,
+          "seq": 16113,
+          "output_sha256": "311976bd442ffdb6617beaac143e60f6142e6706c1e42c6e05e2545291b7e230",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 4,
+          "seq": 16114,
+          "output_sha256": "6c76fcb9afbad3193414ba24d0507090261600d1642096524f03e1aceeec8232",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 5,
+          "seq": 16115,
+          "output_sha256": "6d4ccf3567117a2702675e39f549f35a5c7f67f57818fedbc9638312ce35f13a",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 6,
+          "seq": 16116,
+          "output_sha256": "903e6bfa4a0a31d43f0290fb65d1496e6c58defad9ec6ac38df904329161b989",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        },
+        {
+          "position": 7,
+          "seq": 16117,
+          "output_sha256": "caa87b22d5a91df2ca85372928566262c74824c2d695ba9ce930b079fa3dcb38",
+          "vs_U_bit_exact": false,
+          "vs_B_p0_bit_exact": null
+        }
+      ]
+    }
+  ]
+}

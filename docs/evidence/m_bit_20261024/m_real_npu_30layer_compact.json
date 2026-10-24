@@ -1,0 +1,210 @@
+{
+  "bit": "M attention_planb_full.bit",
+  "bit_sha256_from_user": "67C149839565425CE450BFBCA1E998C58F4700DE0689F0A07FDC057215BBFAB1",
+  "manifest": "/home/kvdev/pcie_bringup_20261024/v44_real_npu_qkv_for_m/manifest.json",
+  "manifest_schema": "REAL_NPU_QKV_FROM_V44_B_FOR_M_FIXED_REPLAY_V1",
+  "source_status": "PASS_V44_B_TWO_PROMPTS_NUMERIC_CAPTURE",
+  "m_expected_outputs_included": false,
+  "start_seq": 18300,
+  "status": "M_REAL_NPU_REPLAY_DONE",
+  "total_frames": 630,
+  "all_finite": true,
+  "final_reset_seq": 18932,
+  "requests": [
+    {
+      "request": 0,
+      "reset_seq": 18300,
+      "positions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "frames": 330
+    },
+    {
+      "request": 1,
+      "reset_seq": 18631,
+      "positions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "frames": 300
+    }
+  ],
+  "vs_B_reference": {
+    "status": "PASS_M_REAL_NPU_TAIL_BIT_EXACT",
+    "total_frames": 630,
+    "bit_exact": 630,
+    "mismatch_count": 0,
+    "all_bit_exact": true,
+    "per_layer": {
+      "0": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "1": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "2": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "3": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "4": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "5": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "6": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "7": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "8": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "9": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "10": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "11": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "12": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "13": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "14": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "15": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "16": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "17": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "18": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "19": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "20": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "21": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "22": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "23": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "24": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "25": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "26": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "27": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "28": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      },
+      "29": {
+        "frames": 21,
+        "bit_exact": 21,
+        "mismatch": 0
+      }
+    }
+  },
+  "note": "B reference is not an independent M golden; all positions <=10 < M tail R=32."
+}

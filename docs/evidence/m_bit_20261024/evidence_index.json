@@ -1,0 +1,15 @@
+{
+  "real_date_utc": "2026-10-24",
+  "board_root": "/home/kvdev/pcie_bringup_20261024",
+  "files": {
+    "op_test": "/home/kvdev/pcie_bringup_20261024/op_test_16000_m_bit_20261024/summary.json",
+    "attention_probe": "/home/kvdev/pcie_bringup_20261024/m_attention_probe_20261024/summary.json",
+    "attention_vs_B_reference": "/home/kvdev/pcie_bringup_20261024/m_attention_probe_20261024/m_vs_B_reference.json",
+    "tail_probe": "/home/kvdev/pcie_bringup_20261024/m_tail_probe_20261024/summary.json",
+    "layer_sweep": "/home/kvdev/pcie_bringup_20261024/m_layer_sweep_20261024/summary.json",
+    "layer_sweep_finite": "/home/kvdev/pcie_bringup_20261024/m_layer_sweep_20261024/finite_check.json",
+    "v44_real_npu_qkv": "/home/kvdev/pcie_bringup_20261024/v44_real_npu_qkv_for_m",
+    "v44_real_npu_replay": "/home/kvdev/pcie_bringup_20261024/m_real_npu_30layer_20261024/summary.json",
+    "v44_real_npu_vs_B": "/home/kvdev/pcie_bringup_20261024/m_real_npu_30layer_20261024/vs_B_reference.json"
+  }
+}

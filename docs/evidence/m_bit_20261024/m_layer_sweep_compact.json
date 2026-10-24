@@ -1,0 +1,310 @@
+{
+  "bit": "M (attention_planb_full.bit)",
+  "bit_sha256_from_user_not_board_read": "67C149839565425CE450BFBCA1E998C58F4700DE0689F0A07FDC057215BBFAB1",
+  "profile": "T2 synthetic, positions 0..63, layers 0..29, MAX_T=256 inferred, no M golden",
+  "start_seq": 16300,
+  "status": "M_LAYER_SWEEP_DONE",
+  "final_reset_seq": 18250,
+  "layers": [
+    {
+      "layer": 0,
+      "reset_seq": 16300,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 1,
+      "reset_seq": 16365,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 2,
+      "reset_seq": 16430,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 3,
+      "reset_seq": 16495,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 4,
+      "reset_seq": 16560,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 5,
+      "reset_seq": 16625,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 6,
+      "reset_seq": 16690,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 7,
+      "reset_seq": 16755,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 8,
+      "reset_seq": 16820,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 9,
+      "reset_seq": 16885,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 10,
+      "reset_seq": 16950,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 11,
+      "reset_seq": 17015,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 12,
+      "reset_seq": 17080,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 13,
+      "reset_seq": 17145,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 14,
+      "reset_seq": 17210,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 15,
+      "reset_seq": 17275,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 16,
+      "reset_seq": 17340,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 17,
+      "reset_seq": 17405,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 18,
+      "reset_seq": 17470,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 19,
+      "reset_seq": 17535,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 20,
+      "reset_seq": 17600,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 21,
+      "reset_seq": 17665,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 22,
+      "reset_seq": 17730,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 23,
+      "reset_seq": 17795,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 24,
+      "reset_seq": 17860,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 25,
+      "reset_seq": 17925,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 26,
+      "reset_seq": 17990,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 27,
+      "reset_seq": 18055,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 28,
+      "reset_seq": 18120,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    },
+    {
+      "layer": 29,
+      "reset_seq": 18185,
+      "B_exact_prefix_len": 32,
+      "B_exact_post_tail": 0,
+      "U_exact_post_tail": 0,
+      "M_distinct_post_tail": 32,
+      "first_post_tail_divergence": 32,
+      "post_tail_class": "M_DISTINCT"
+    }
+  ]
+}
