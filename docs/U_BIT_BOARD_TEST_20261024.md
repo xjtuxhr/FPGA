@@ -1,6 +1,6 @@
 # U 候选 bit 实板测试记录（2026-10-24）
 
-状态：**U 候选 bit 的功能通路已跑通；U golden 逐位对拍、PPL/质量、B/U/M 对比尚未完成。**
+状态：**U 候选 bit 的功能通路和 layer0 U golden 已通过；PPL/质量、B/U/M 对比尚未完成。**
 
 - 真实日期：2026-10-24。板钟错误，板上时间显示 2026-04-27 UTC；本文所有板端时间戳不可作为日期证据。
 - 测试对象：B 通过 JTAG 烧录的 U 候选版 `attention_planb_full.bit`，本地路径 `E:\KVmix\um_td_planb_u_dequantpipe_20261023\attention_planb_full.bit`。
@@ -17,8 +17,10 @@
 | U Attention 合成向量 pos0..7 | **PASS**：两轮 RESET 会话，逐位一致，全部 finite |
 | U Attention 长上下文 256 | **PASS**：3 次独立会话共 768 次 Attention，256 个输出三次逐位一致，全部 finite |
 | U 30 层文本生成（v44 路径） | **PASS**：两次独立运行，生成 token 完全一致 |
-| U vs B/float 数值诊断 | 差异随 context 增大而下降，未发散；**不是 U golden** |
-| U golden 逐位对拍 | **NOT RUN**：缺少 B 提供的独立 U 期望向量 |
+| U golden：真实 NPU layer0 pos0..7 | **PASS**：8 帧连续对拍，逐位一致，0 mismatch |
+| U golden：T2 合成 256 位置 | **PASS**：256/256 逐位一致，concat SHA 相同 |
+| U vs B/float 数值诊断 | 差异随 context 增大而下降，未发散；不是 golden |
+| C2H 首次超时诊断 | 8 帧 golden 运行未触发；harness 已就位，首次超时即落盘 |
 | PPL / HF parity / 质量 | **NOT RUN**：需 PC1 的 HF/PPL 环境 |
 | B/U/M 同条件对比 | **NOT RUN**：需重新烧 B/M bit |
 
@@ -190,6 +192,47 @@ production_latency_measured = False
 - 每个结果目录含 `summary.json`、`logits/`、`wire/`、`probe/`、`run.log` 和 `*.portable.tar.gz`。
 - 真实层0 probe 原始帧：`/home/kvdev/pcie_bringup_20261024/u_full_v44_probe_20261024/`
 
+## 5.5 U golden 对拍（PC1 交付）
+
+PC1 于 2026-10-24 交付 `pc1_u_board_report_match_20261024.zip`，其中包含真实 RK NPU layer0 pos0..7 的 U 参考：
+
+```text
+pc_20261024_u_npu_v40_capture_golden/
+  manifest.json
+  pos000..pos007.qkv.fp16.bin        (1920 B each)
+  pos000..pos007.attention.fp16.bin  (1152 B each)
+pc_20261024_u_npu_v40_capture_golden_v2.json
+pc_20261024_u_t2_256_golden.json
+score_u_npu_capture.py
+score_u_t2_stream.py
+```
+
+manifest 状态为 `PC1_INDEPENDENT_U_NPU_CAPTURE_GOLDEN_NOT_BOARD`；输入为 post-RoPE Q/K，边界和 U 量化语义由 PC1 产生，**不是板端反推**。
+
+实板 8 帧连续对拍：
+
+- RESET seq 12500，随后 pos0..7 连续 seq 12501..12508，layer0，binding v2，单请求 timeout 12 s。
+- 结果：**8/8 `bit_exact=true`，`mismatch_bytes=0`**；每帧 board SHA256 与 manifest `output_sha256` 完全一致。
+- 延迟（transport RTT）：1.034 / 1.825 / 2.448 / 3.093 / 3.761 / 4.148 / 4.752 / 5.324 ms。
+- 收尾 RESET seq 12509；`VERSION=0x504C4231`，`STATUS=0x11`（DONE/READY，ERR=OK）。
+- 证据：`/home/kvdev/pcie_bringup_20261024/u_npu_golden_8frame_20261024/`
+
+同一交付包还包含 T2 合成 256 位置的 golden。用板上已保存的 256 个输出逐位比较：
+
+```text
+positions_compared = 256
+mismatch_count = 0
+golden_concatenated_output_sha256 = 045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976
+board_concatenated_output_sha256  = 045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976
+status = PASS_U_T2_256_GOLDEN_BIT_EXACT
+```
+
+证据：`/home/kvdev/pcie_bringup_20261024/u_attention_ctx256_outputs_20261024/u_t2_256_golden_compare.json`
+
+这也回答了此前 v44 probe 的独立性问题：probe 的 pos0 U 输出 `16bbb131...` 与 PC1 golden 的 pos0 输出一致；T2 256 的 concat SHA `045d90a0...` 也与 PC1 golden 一致。此前基于板端自测值的 probe 不是偶然自洽，而是与 PC1 的独立 U 参考逐位相同。
+
+**C2H 首次超时诊断**：8 帧 golden 运行没有出现 C2H 超时，因此没有生成 `diag_first_c2h_timeout/`。对拍 runner `scripts/u_npu_golden_8frame.py` 已内置诊断：首次 C2H/H2C 超时或 golden mismatch 时立即 fail-stop，并在关闭设备前保存 dmesg、BAR0 STATUS/VERSION/CONTROL、链路速度/宽度、驱动参数、transport 状态、当前帧和 `diagnostic.json`，不自动重试、不自动 reset/recovery。
+
 ## 6. U vs B/float 数值诊断
 
 说明：B reference 是 `attention_pkg_20261014` 的 B 模式候选参考（FP16 KV、Q8.8、exp-LUT），**不是 U golden**。该表只用于观察 U 量化误差随 context 的趋势。
@@ -230,6 +273,7 @@ abort transfer ...
 - 干净连续运行 512 次（256×2）和 256 次（另一次）均 0 错误，输出逐位一致。
 - 判断：host/driver `poll_mode=1` 的 C2H 完成通知偶发丢失，与 U bit 的 Attention 数值无关；需 PC2 继续跟踪（现有 H2C deadline 文档未覆盖 C2H 完成丢失）。
 - 该失败运行的 `summary.json` 保留在 `u_attention_ctx256_metrics_20261024/`，**不要**把其中的部分结果当作 Gate；长上下文数据以 `u_attention_ctx256_outputs_20261024/` 的干净三次一致结果为准。
+- 2026-10-24 的真实 NPU 8 帧 golden 对拍**没有**触发 C2H 超时；`u_npu_golden_8frame_20261024/` 下没有 `diag_first_c2h_timeout/`。该 runner 的诊断路径已保留，下一次首次超时会自动落盘。
 
 ## 8. 证据清单
 
@@ -246,16 +290,21 @@ abort transfer ...
 | `u_attention_ctx256_metrics_20261024/` | 穿插 B-reference 的失败诊断（保留，不作 Gate） |
 | `u_full_v44_probe_20261024/` | 真实 layer0 pos0 的 U 输出（probe 期望来源） |
 | `u_full_v44_20261024/` | 打补丁的 U v44 副本；run1/run2 结果与 portable tar.gz |
-| `scripts/` | 本次使用的探针脚本（ctx256、metrics、v44 probe 等） |
+| `pc_20261024_u_npu_v40_capture_golden/` | PC1 交付的真实 NPU pos0..7 U golden（qkv + attention + manifest） |
+| `pc_20261024_u_npu_v40_capture_golden_v2.json` | 同一 golden 的扁平 JSON |
+| `pc_20261024_u_t2_256_golden.json` | PC1 交付的 T2 256 U golden |
+| `u_npu_golden_8frame_20261024/` | 8 帧真实 NPU golden 对拍：summary + 每帧 request/response/golden |
+| `u_attention_ctx256_outputs_20261024/u_t2_256_golden_compare.json` | T2 256 golden 256/256 对拍结果 |
+| `scripts/` | 本次使用的探针脚本（ctx256、8-frame golden、metrics、v44 probe 等） |
 
-GitHub 副本：`docs/evidence/u_bit_20261024/`（本次使用的探针脚本）。原始 `summary.json`、逐帧数据和 portable tar.gz 仍只在板上，未上传到 Git。
+GitHub 副本：`docs/evidence/u_bit_20261024/`（探针脚本 + 8 帧 summary + T2 256 对拍结果）。PC1 的 golden binary 和板上原始逐帧数据未全部上传；golden 的 manifest/hash 以本文和板上目录为准。
 
 ## 9. 未完成 Gate 与边界
 
-1. **U golden 逐位对拍（阻塞）**：需要 B 提供独立 U 期望向量（T2 pos0..7 或真实 layer0 的 576×N FP16 / 每帧 SHA），当前只有 U bit 自测 probe。
+1. **U golden 覆盖范围**：真实 NPU layer0 pos0..7 和 T2 256 已 **PASS**；尚未覆盖 30 层逐层、其他 prompt、HF float logits 或数据集 PPL。需要 PC1 继续交付对应 golden。
 2. **PPL / HF parity / 质量**：需 PC1 的 HF/PPL 环境；v44 明确 `quality_gate_passed=false`、`hf_parity_passed=false`。
 3. **B/U/M 同条件对比**：需要重新烧 B/M bit；当前板上是 U bit，旧 B 结论不能沿用。
-4. **C2H poll-mode 完成丢失**：PC2 需复核；本次已用完整恢复绕过，未定位根因。
+4. **C2H poll-mode 完成丢失**：PC2 需复核；8 帧 golden 对拍未触发，未定位根因；首次超时诊断 harness 已就位。
 5. **生产数值格式/延迟**：本次是 v2 FP16 测试 profile；不代表生产 dtype、scale、PCIe packet 或端到端性能。
 6. **bit 身份**：文件 SHA 由 B 提供，板端只能读 `VERSION=0x504C4231`；`VERSION` 不能唯一区分 bit。
 7. **时间**：板钟错误约 6 个月，所有板端 `generated_utc`/mtime 不可用。
@@ -295,6 +344,18 @@ KVMIX_PC2_IDLE_CONFIRMED=YES \
 KVMIX_TEMP_VIDEO_APPROVED=YES \
 bash host/tools/run_full_text_v44.sh \
   /home/kvdev/pcie_bringup_20261024/u_full_v44_20261024 11800 11757
+```
+
+真实 NPU 8 帧 U golden（脚本内 `OUT`/`START` 固定；复测需改 `OUT` 和递增的 `START`）：
+
+```sh
+python3 /home/kvdev/pcie_bringup_20261024/scripts/u_npu_golden_8frame.py
+```
+
+T2 256 U golden 对拍（使用已保存的 256 个输出）：
+
+```sh
+python3 /home/kvdev/pcie_bringup_20261024/scripts/compare_t2_256.py
 ```
 
 合成 Attention 探针脚本见 `scripts/`；每次都从 RESET 开始，seq 必须大于之前所有已尝试 seq。

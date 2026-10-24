@@ -1,0 +1,110 @@
+{
+  "real_date_utc": "2026-10-24",
+  "golden_dir": "/home/kvdev/pcie_bringup_20261024/pc_20261024_u_npu_v40_capture_golden",
+  "golden_manifest_sha256": "eea5ad2c97a487cbb39b3306a95f5325a0a06c0b66e9b8088296f5c21f0547f3",
+  "binding": "/home/kvdev/work_pc2_pcie/real_attention_pkg_20261016/pcie_transport/bindings/board_20261016.json",
+  "start_seq": 12500,
+  "timeout_s": 12.0,
+  "bit_sha256_from_B": "B5AD8F911EC270E448993D09C1BC243B4420D873870B3B18D39BD46A2958B26B",
+  "status": "PASS_U_NPU_GOLDEN_POS0_7_BIT_EXACT",
+  "rows": [
+    {
+      "position": 0,
+      "seq": 12501,
+      "input_sha256": "42de7ec4bc029f4e0a726b38777060158713884d4d69732372db340f5bf2cd9e",
+      "golden_sha256": "16bbb13180d5156c299eaa019f37d5915a512713bf3c2ff6dea50f0d917f1d8b",
+      "board_sha256": "16bbb13180d5156c299eaa019f37d5915a512713bf3c2ff6dea50f0d917f1d8b",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.001034408998748404
+    },
+    {
+      "position": 1,
+      "seq": 12502,
+      "input_sha256": "332bddc0962fc7be0482af34d1cfd46278dce5006afd5cb3da7d3b48347630cb",
+      "golden_sha256": "d1a150abd81d86e5a12061cf5c9d063a16074cec55c1ed20a1f246aab7c9d172",
+      "board_sha256": "d1a150abd81d86e5a12061cf5c9d063a16074cec55c1ed20a1f246aab7c9d172",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.001824677000513475
+    },
+    {
+      "position": 2,
+      "seq": 12503,
+      "input_sha256": "c91b280ed436d38b8bf03d666bd2cb6f6ccb57a7307e744f8e6797a2551d81d9",
+      "golden_sha256": "c19a4001336a733c96da87958f2ba3b1def0f97fface398c7c6f221a115c5fb6",
+      "board_sha256": "c19a4001336a733c96da87958f2ba3b1def0f97fface398c7c6f221a115c5fb6",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.002448485999593686
+    },
+    {
+      "position": 3,
+      "seq": 12504,
+      "input_sha256": "86e6fa09119a1668a4c8eaec5f0ffaa37c2e32baaa46fb3ee69da0151f0e6722",
+      "golden_sha256": "794d10b97ac1f9d106662bd33699152b980590a27aa767c1db0a24a42cdb7007",
+      "board_sha256": "794d10b97ac1f9d106662bd33699152b980590a27aa767c1db0a24a42cdb7007",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.0030932540003050235
+    },
+    {
+      "position": 4,
+      "seq": 12505,
+      "input_sha256": "f2eaab3c7323d0c1ac4bc15619a0da4b169e45843de7d3a42d2255d6e34e1271",
+      "golden_sha256": "a8141c194099d83129b9c1750fd0d44afe18377fc8a84a19bea95de1a91d9bdd",
+      "board_sha256": "a8141c194099d83129b9c1750fd0d44afe18377fc8a84a19bea95de1a91d9bdd",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.0037611859997923602
+    },
+    {
+      "position": 5,
+      "seq": 12506,
+      "input_sha256": "1f3eda8863717a6bb0e4b418a10dfc879a29d33078efe03f8ea9d920359423c6",
+      "golden_sha256": "47922126aef9fc5da6bc2b26b599859923c3d0f2894a7abe6f5fa155da1aa357",
+      "board_sha256": "47922126aef9fc5da6bc2b26b599859923c3d0f2894a7abe6f5fa155da1aa357",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.004148141999394284
+    },
+    {
+      "position": 6,
+      "seq": 12507,
+      "input_sha256": "2b19b4ac794af1c532683bd62fa5921814008bdc591a0d74a1d173b78e540a6a",
+      "golden_sha256": "c8734a31a6eb9455c88b20974f4eb3d9e2a3ad5f3d20c0ceea61dc7a07b38fd3",
+      "board_sha256": "c8734a31a6eb9455c88b20974f4eb3d9e2a3ad5f3d20c0ceea61dc7a07b38fd3",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.004752349999762373
+    },
+    {
+      "position": 7,
+      "seq": 12508,
+      "input_sha256": "018c4efa6ad72499160f542d26d1ce33d92724f681a8e23fdc18c68774e4d561",
+      "golden_sha256": "4b0034e823e0b0360a8aa7bdda6b48af1181a99838e1733728a9d9f81403d2ed",
+      "board_sha256": "4b0034e823e0b0360a8aa7bdda6b48af1181a99838e1733728a9d9f81403d2ed",
+      "bit_exact": true,
+      "mismatch_bytes": 0,
+      "transport_total_s": 0.005324204000316968
+    }
+  ],
+  "reset_seq": 12500,
+  "reset_total_s": 0.0009189889997287537,
+  "final_reset_seq": 12509,
+  "final_reset_total_s": 0.0006692309998470591,
+  "bar0_after": {
+    "0x5C": "0x56440013",
+    "0x74": "0x00000C05",
+    "0x84": "0x00002001",
+    "0x90": "0x00000001",
+    "0x94": "0x00000000",
+    "0x98": "0x00000064",
+    "0x9C": "0x00000000",
+    "0xA0": "0x00000000",
+    "0xA4": "0x00000011",
+    "0xA8": "0x00000000",
+    "0xAC": "0x504C4231",
+    "0xB0": "0x00000000"
+  }
+}

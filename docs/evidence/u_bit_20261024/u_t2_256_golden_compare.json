@@ -1,0 +1,10 @@
+{
+  "golden_file": "/home/kvdev/pcie_bringup_20261024/pc_20261024_u_t2_256_golden.json",
+  "golden_status": "PC1_INDEPENDENT_U_T2_CANDIDATE_REFERENCE_NOT_BOARD",
+  "golden_concatenated_output_sha256": "045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976",
+  "board_concatenated_output_sha256": "045d90a02533cfc1675531f5a147276299f1c3ce9ec1222fd4b547cd28c79976",
+  "positions_compared": 256,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "status": "PASS_U_T2_256_GOLDEN_BIT_EXACT"
+}
